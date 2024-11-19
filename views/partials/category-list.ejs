@@ -1,0 +1,27 @@
+<% 
+function renderCategories(categories, level = 0) { 
+    categories.forEach(function(category) {
+%>
+    <div class="<%= level > 0 ? 'ml-' + (level * 4) : '' %> mb-2">
+        <label class="inline-flex items-center">
+            <input type="radio" 
+                   name="categoria" 
+                   value="<%= category.id %>"
+                   class="form-radio text-purple-600 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray">
+            <span class="ml-2 text-sm <%= level === 0 ? 'font-medium text-gray-700 dark:text-gray-300' : 'text-gray-600 dark:text-gray-400' %>">
+                <%= category.name %>
+            </span>
+        </label>
+        
+        <% if (category.children && category.children.length > 0) { %>
+            <div class="ml-4">
+                <% renderCategories(category.children, level + 1); %>
+            </div>
+        <% } %>
+    </div>
+<%
+    });
+}
+%>
+
+<% renderCategories(categories); %> 

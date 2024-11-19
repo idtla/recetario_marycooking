@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html :class="{ 'theme-dark': dark }" x-data="{ dark: false }" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Editar <%= recipe.titulo %> - Mary Cooking Recetario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/tailwind.output.css" />
+    
+    <!-- TinyMCE -->
+    <script src="https://cdn.tiny.cloud/1/ujxekjwb4seln0txoaecg9eslfk2aa3vyhp60uyhmgly1evg/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            tinymce.init({
+                selector: '#instrucciones',
+                plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                    'insertdatetime', 'media', 'table', 'help', 'wordcount'
+                ],
+                toolbar: 'undo redo | blocks | ' +
+                        'bold italic backcolor | alignleft aligncenter ' +
+                        'alignright alignjustify | bullist numlist outdent indent | ' +
+                        'removeformat | help',
+                height: 400,
+                language: 'es',
+                menubar: true,
+                branding: false,
+                promotion: false,
+                readonly: false,
+                content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 16px; }',
+                setup: function(editor) {
+                    editor.on('change', function() {
+                        editor.save();
+                    });
+                }
+            });
+        });
+    </script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <%- include('../partials/header') %>
+        
+        <main class="container mx-auto px-6 py-8">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-6">
+                    Editar Receta: <%= recipe.titulo %>
+                </h2>
+
+                <% if (error) { %>
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+                        <span class="block sm:inline"><%= error %></span>
+                    </div>
+                <% } %>
+
+                <div class="bg-white rounded-lg shadow-md dark:bg-gray-800 p-6">
+                    <form id="recipeForm" 
+                        action="/recipes/<%= recipe.Category.slug %>/<%= recipe.slug %>/update" 
+                        method="POST" 
+                        enctype="multipart/form-data"
+                        x-data="{ 
+                            titulo: '<%= recipe.titulo.replace(/'/g, "\\'") %>',
+                            descripcion: '<%= recipe.descripcion ? recipe.descripcion.replace(/'/g, "\\'") : "" %>',
+                            ingredientes: '<%= recipe.ingredientes ? recipe.ingredientes.replace(/'/g, "\\'").replace(/\n/g, "\\n") : "" %>',
+                            instrucciones: '<%= recipe.instrucciones ? recipe.instrucciones.replace(/'/g, "\\'").replace(/\n/g, "\\n") : "" %>',
+                            tiempoPreparacion: <%= recipe.tiempoPreparacion || 0 %>,
+                            tiempoCoccion: <%= recipe.tiempoCoccion || 0 %>,
+                            tiempoTotal: <%= recipe.tiempoTotal || 0 %>,
+                            dificultad: '<%= recipe.dificultad %>',
+                            porciones: <%= recipe.porciones || 0 %>,
+                            calculateTiempoTotal() {
+                                this.tiempoTotal = parseInt(this.tiempoPreparacion || 0) + parseInt(this.tiempoCoccion || 0);
+                            }
+                        }">
+                        <input type="hidden" name="_method" value="PUT">
+
+                        <!-- Título -->
+                        <label class="block text-sm">
+                            <span class="text-gray-700 dark:text-gray-400">Título</span>
+                            <input
+                                x-model="titulo"
+                                class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray form-input"
+                                name="titulo"
+                                type="text"
+                                value="<%= recipe.titulo %>"
+                                required
+                            />
+                        </label>
+
+                        <!-- Descripción -->
+                        <div class="mt-4">
+                            <label class="block text-sm">
+                                <span class="text-gray-700 dark:text-gray-400">Descripción</span>
+                                <textarea
+                                    x-model="descripcion"
+                                    class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray form-textarea"
+                                    name="descripcion"
+                                    rows="3"
+                                    required
+                                ><%= recipe.descripcion %></textarea>
+                            </label>
+                        </div>
+
+                        <!-- Imágenes -->
+                        <div class="mt-4">
+                            <label class="block text-sm">
+                                <span class="text-gray-700 dark:text-gray-400">Imagen destacada</span>
+                                <% if (recipe.imagen) { %>
+                                    <div class="mt-2 mb-2">
+                                        <img src="<%= recipe.imagen %>" alt="Imagen actual" class="w-32 h-32 object-cover rounded">
+                                    </div>
+                                <% } %>
+                                <input type="file" 
+                                       name="imagenDestacada" 
+                                       accept="image/*"
+                                       class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                />
+                            </label>
+                        </div>
+
+                        <div class="mt-4">
+                            <label class="block text-sm">
+                                <span class="text-gray-700 dark:text-gray-400">Imágenes adicionales</span>
+                                <% if (Array.isArray(recipe.imagenesAdicionales) && recipe.imagenesAdicionales.length > 0) { %>
+                                    <div class="grid grid-cols-5 gap-2 mt-2 mb-2">
+                                        <% recipe.imagenesAdicionales.forEach(function(imagen) { %>
+                                            <div class="relative">
+                                                <img src="<%= imagen %>" 
+                                                     alt="Imagen adicional" 
+                                                     class="w-20 h-20 object-cover rounded">
+                                            </div>
+                                        <% }); %>
+                                    </div>
+                                <% } else { %>
+                                    <p class="text-sm text-gray-500 mt-2">No hay imágenes adicionales</p>
+                                <% } %>
+                            </label>
+
+                            <!-- Campo para nuevas imágenes -->
+                            <label class="block mt-4 text-sm">
+                                <span class="text-gray-700 dark:text-gray-400">Añadir nuevas imágenes</span>
+                                <input type="file" 
+                                       name="imagenesAdicionales" 
+                                       multiple 
+                                       accept="image/*"
+                                       class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray">
+                            </label>
+                        </div>
+
+                        <!-- Ingredientes -->
+                        <div class="mt-4">
+                            <label class="block text-sm">
+                                <span class="text-gray-700 dark:text-gray-400">Ingredientes (uno por línea)</span>
+                                <textarea
+                                    x-model="ingredientes"
+                                    class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray form-textarea"
+                                    name="ingredientes"
+                                    rows="5"
+                                    required
+                                ><%= recipe.ingredientes %></textarea>
+                            </label>
+                        </div>
+
+                        <!-- Instrucciones -->
+                        <div class="mt-4">
+                            <label class="block text-sm">
+                                <span class="text-gray-700 dark:text-gray-400">Instrucciones</span>
+                                <textarea
+                                    id="instrucciones"
+                                    name="instrucciones"
+                                    required
+                                ><%= recipe.instrucciones %></textarea>
+                            </label>
+                        </div>
+
+                        <!-- Categoría -->
+                        <div class="mt-4" x-data>
+                            <label class="block text-sm">
+                                <span class="text-gray-700 dark:text-gray-400">Categoría</span>
+                                <div class="flex justify-between items-center mb-2">
+                                    <button @click="$dispatch('open-modal', 'create-category')" 
+                                            type="button"
+                                            class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
+                                        + Nueva Categoría
+                                    </button>
+                                </div>
+                                <div class="mt-1 p-3 bg-white dark:bg-gray-700 rounded-md border dark:border-gray-600 max-h-60 overflow-y-auto category-list-container">
+                                    <% function renderCategories(categories) { %>
+                                        <% categories.forEach(function(category) { %>
+                                            <div class="mb-2">
+                                                <label class="inline-flex items-center">
+                                                    <input type="radio" 
+                                                           name="categoria" 
+                                                           value="<%= category.id %>"
+                                                           <%= recipe.categoryId === category.id ? 'checked' : '' %>
+                                                           class="form-radio text-purple-600 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray">
+                                                    <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                        <%= category.name %>
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            
+                                            <% if (category.children && category.children.length > 0) { %>
+                                                <div class="ml-6">
+                                                    <% renderCategories(category.children); %>
+                                                </div>
+                                            <% } %>
+                                        <% }); %>
+                                    <% } %>
+                                    
+                                    <% renderCategories(categories); %>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Dificultad -->
+                        <div class="mt-4">
+                            <label class="block text-sm">
+                                <span class="text-gray-700 dark:text-gray-400">Dificultad</span>
+                                <select name="dificultad" required
+                                    class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-select">
+                                    <option value="Fácil" <%= recipe.dificultad.nombre === 'Fácil' ? 'selected' : '' %>>Fácil</option>
+                                    <option value="Moderada" <%= recipe.dificultad.nombre === 'Moderada' ? 'selected' : '' %>>Moderada</option>
+                                    <option value="Difícil" <%= recipe.dificultad.nombre === 'Difícil' ? 'selected' : '' %>>Difícil</option>
+                                    <option value="Extra Difícil" <%= recipe.dificultad.nombre === 'Extra Difícil' ? 'selected' : '' %>>Extra Difícil</option>
+                                </select>
+                            </label>
+                        </div>
+
+                        <!-- Tiempos -->
+                        <div class="mt-4 grid gap-6 mb-8 md:grid-cols-3">
+                            <!-- Tiempo de preparación -->
+                            <div>
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 dark:text-gray-400">
+                                        Tiempo de preparación (min)
+                                    </span>
+                                    <input type="number" 
+                                           name="tiempoPreparacion" 
+                                           required 
+                                           min="1"
+                                           value="<%= recipe.tiempoPreparacion %>"
+                                           x-model="tiempoPreparacion"
+                                           @input="calculateTiempoTotal"
+                                           class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                    />
+                                </label>
+                            </div>
+
+                            <!-- Tiempo de cocción -->
+                            <div>
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 dark:text-gray-400">
+                                        Tiempo de cocción (min)
+                                    </span>
+                                    <input type="number" 
+                                           name="tiempoCoccion" 
+                                           required 
+                                           min="0"
+                                           value="<%= recipe.tiempoCoccion %>"
+                                           x-model="tiempoCoccion"
+                                           @input="calculateTiempoTotal"
+                                           class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                    />
+                                </label>
+                            </div>
+
+                            <!-- Tiempo total (calculado automáticamente) -->
+                            <div>
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 dark:text-gray-400">
+                                        Tiempo total (min)
+                                    </span>
+                                    <input type="number" 
+                                           x-model="tiempoTotal"
+                                           disabled
+                                           class="block w-full mt-1 text-sm bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 form-input cursor-not-allowed"
+                                    />
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Botones -->
+                        <div class="flex justify-end mt-6 space-x-3">
+                            <a href="/recipes/<%= recipe.Category.slug %>/<%= recipe.slug %>"
+                                class="px-4 py-2 text-sm font-medium leading-5 text-gray-700 transition-colors duration-150 border border-gray-300 rounded-lg dark:text-gray-400 active:bg-transparent hover:border-gray-500 focus:border-gray-500 active:text-gray-500 focus:outline-none focus:shadow-outline-gray">
+                                Cancelar
+                            </a>
+                            <button type="submit"
+                                class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+        
+        <%- include('../partials/footer') %>
+    </div>
+
+    <!-- Modal Nueva Categoría -->
+    <dialog id="newCategoryModal" class="p-0 max-w-md rounded-lg shadow-lg">
+        <div class="p-6">
+            <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-5">
+                Nueva Categoría
+            </h3>
+            
+            <form id="newCategoryForm">
+                <div class="mb-4">
+                    <label class="block text-sm">
+                        <span class="text-gray-700 dark:text-gray-400">Nombre</span>
+                        <input type="text" 
+                               name="name" 
+                               required
+                               class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                    />
+                </label>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm">
+                    <span class="text-gray-700 dark:text-gray-400">Categoría Padre (opcional)</span>
+                    <select name="parentId"
+                        class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-select"
+                    >
+                        <option value="">Ninguna (Categoría principal)</option>
+                        <% categories.forEach(function(category) { %>
+                            <% if (!category.parentId) { %>
+                                <option value="<%= category.id %>"><%= category.name %></option>
+                            <% } %>
+                        <% }); %>
+                    </select>
+                </label>
+            </div>
+
+            <div class="flex justify-end mt-6 space-x-3">
+                <button type="button" onclick="closeModal()"
+                    class="px-4 py-2 text-sm font-medium leading-5 text-gray-700 transition-colors duration-150 border border-gray-300 rounded-lg dark:text-gray-400 active:bg-transparent hover:border-gray-500 focus:border-gray-500 active:text-gray-500 focus:outline-none focus:shadow-outline-gray">
+                    Cancelar
+                </button>
+                <button type="submit"
+                    class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
+                    Crear
+                </button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<script>
+    // Función para abrir el modal
+    window.addEventListener('open-modal', (event) => {
+        if (event.detail === 'create-category') {
+            document.getElementById('newCategoryModal').showModal();
+        }
+    });
+
+    // Función para cerrar el modal
+    function closeModal() {
+        document.getElementById('newCategoryModal').close();
+    }
+
+    // Manejar el envío del formulario
+    document.getElementById('newCategoryForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        try {
+            const response = await fetch('/categories/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(Object.fromEntries(formData))
+            });
+
+            if (response.ok) {
+                // Actualizar la lista de categorías
+                const categoryListResponse = await fetch('/api/categories/render');
+                if (categoryListResponse.ok) {
+                    const html = await categoryListResponse.text();
+                    document.querySelector('.category-list-container').innerHTML = html;
+                }
+                closeModal();
+                this.reset();
+            } else {
+                throw new Error('Error al crear la categoría');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al crear la categoría');
+        }
+    });
+</script>
+</body>
+</html> 

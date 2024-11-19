@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html :class="{ 'theme-dark': dark }" x-data="{ dark: false }" lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crear Receta - Mary Cooking Recetario</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/tailwind.output.css" />
+    
+    <!-- TinyMCE -->
+    <script src="https://cdn.tiny.cloud/1/ujxekjwb4seln0txoaecg9eslfk2aa3vyhp60uyhmgly1evg/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            tinymce.init({
+                selector: '#instrucciones',
+                plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                    'insertdatetime', 'media', 'table', 'help', 'wordcount'
+                ],
+                toolbar: 'undo redo | blocks | ' +
+                        'bold italic backcolor | alignleft aligncenter ' +
+                        'alignright alignjustify | bullist numlist outdent indent | ' +
+                        'removeformat | help',
+                height: 400,
+                language: 'es',
+                menubar: true,
+                branding: false,
+                promotion: false,
+                readonly: false,
+                content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 16px; }',
+                setup: function(editor) {
+                    editor.on('change', function() {
+                        editor.save();
+                    });
+                }
+            });
+        });
+    </script>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body>
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <%- include('../partials/header') %>
+        
+        <main class="container mx-auto px-6 py-8">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-6">
+                    Crear Nueva Receta
+                </h2>
+
+                <% if (error) { %>
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+                        <span class="block sm:inline"><%= error %></span>
+                    </div>
+                <% } %>
+
+                <div class="bg-white rounded-lg shadow-md dark:bg-gray-800 p-6">
+                    <form id="recipeForm" action="/recipes/create" method="POST" 
+                        enctype="multipart/form-data"
+                        x-data="{ 
+                            titulo: '',
+                            descripcion: '',
+                            ingredientes: '',
+                            instrucciones: '',
+                            tiempoPreparacion: '',
+                            tiempoCoccion: '',
+                            tiempoTotal: 0,
+                            dificultad: 'Moderada',
+                            porciones: 4,
+                            touched: {
+                                titulo: false,
+                                descripcion: false,
+                                ingredientes: false,
+                                instrucciones: false
+                            },
+                            validateTitulo() {
+                                return this.titulo.length >= 3;
+                            },
+                            validateDescripcion() {
+                                return this.descripcion.length >= 10;
+                            },
+                            validateIngredientes() {
+                                return this.ingredientes.trim().split('\n').length >= 1;
+                            },
+                            validateInstrucciones() {
+                                return this.instrucciones.trim().split('\n').length >= 1;
+                            },
+                            calculateTiempoTotal() {
+                                this.tiempoTotal = parseInt(this.tiempoPreparacion || 0) + parseInt(this.tiempoCoccion || 0);
+                            }
+                        }">
+
+                            <!-- Título -->
+                            <label class="block text-sm">
+                                <span class="text-gray-700 dark:text-gray-400">Título</span>
+                                <input
+                                    x-model="titulo"
+                                    @blur="touched.titulo = true"
+                                    :class="{
+                                        'border-red-600 focus:border-red-400 focus:shadow-outline-red': touched.titulo && !validateTitulo(),
+                                        'border-green-600 focus:border-green-400 focus:shadow-outline-green': touched.titulo && validateTitulo()
+                                    }"
+                                    class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray form-input"
+                                    name="titulo"
+                                    type="text"
+                                    required
+                                />
+                                <span class="text-xs text-red-600 dark:text-red-400" 
+                                    x-show="touched.titulo && !validateTitulo()">
+                                    El título debe tener al menos 3 caracteres
+                                </span>
+                            </label>
+
+                            <!-- Después del título -->
+                            <div class="mt-4">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 dark:text-gray-400">Imagen destacada</span>
+                                    <input type="file" 
+                                           name="imagenDestacada" 
+                                           accept="image/*"
+                                           class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                    />
+                                </label>
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 dark:text-gray-400">Imágenes adicionales (máximo 5)</span>
+                                    <input type="file" 
+                                           name="imagenesAdicionales" 
+                                           accept="image/*"
+                                           multiple
+                                           class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                    />
+                                </label>
+                            </div>
+
+                            <!-- Descripción -->
+                            <div class="mt-4">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 dark:text-gray-400">Descripción</span>
+                                    <textarea
+                                        x-model="descripcion"
+                                        @blur="touched.descripcion = true"
+                                        :class="{
+                                            'border-red-600 focus:border-red-400 focus:shadow-outline-red': touched.descripcion && !validateDescripcion(),
+                                            'border-green-600 focus:border-green-400 focus:shadow-outline-green': touched.descripcion && validateDescripcion()
+                                        }"
+                                        class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray form-textarea"
+                                        name="descripcion"
+                                        rows="3"
+                                        required
+                                    ></textarea>
+                                    <span class="text-xs text-red-600 dark:text-red-400" 
+                                        x-show="touched.descripcion && !validateDescripcion()">
+                                        La descripción debe tener al menos 10 caracteres
+                                    </span>
+                                </label>
+                            </div>
+
+                            <!-- Ingredientes y porciones -->
+                            <div class="mt-4 grid gap-6 md:grid-cols-4">
+                                <!-- Porciones -->
+                                <div>
+                                    <label class="block text-sm">
+                                        <span class="text-gray-700 dark:text-gray-400">Porciones</span>
+                                        <input type="number" 
+                                               name="porciones" 
+                                               required 
+                                               min="1" 
+                                               max="50" 
+                                               value="4"
+                                               class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                        />
+                                    </label>
+                                </div>
+                                
+                                <!-- Ingredientes (ocupando 3 columnas) -->
+                                <div class="md:col-span-3">
+                                    <label class="block text-sm">
+                                        <span class="text-gray-700 dark:text-gray-400">Ingredientes (uno por línea)</span>
+                                        <textarea
+                                            x-model="ingredientes"
+                                            @blur="touched.ingredientes = true"
+                                            :class="{
+                                                'border-red-600 focus:border-red-400 focus:shadow-outline-red': touched.ingredientes && !validateIngredientes(),
+                                                'border-green-600 focus:border-green-400 focus:shadow-outline-green': touched.ingredientes && validateIngredientes()
+                                            }"
+                                            class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray form-textarea"
+                                            name="ingredientes"
+                                            rows="5"
+                                            required
+                                        ></textarea>
+                                        <span class="text-xs text-red-600 dark:text-red-400" 
+                                            x-show="touched.ingredientes && !validateIngredientes()">
+                                            Añade al menos un ingrediente
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Instrucciones -->
+                            <div class="mt-4">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 dark:text-gray-400">Instrucciones</span>
+                                    <textarea
+                                        id="instrucciones"
+                                        name="instrucciones"
+                                        required
+                                    ></textarea>
+                                </label>
+                            </div>
+
+                            <!-- Categoría con estructura de árbol -->
+                            <div class="mt-4" x-data>
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 dark:text-gray-400">Categoría</span>
+                                    <div class="flex justify-between items-center mb-2">
+                                        <button @click="$dispatch('open-modal', 'create-category')" 
+                                                type="button"
+                                                class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
+                                            + Nueva Categoría
+                                        </button>
+                                    </div>
+                                    <div class="mt-1 p-3 bg-white dark:bg-gray-700 rounded-md border dark:border-gray-600 max-h-60 overflow-y-auto category-list-container">
+                                        <% function renderCategories(categories) { %>
+                                            <% categories.forEach(function(category) { %>
+                                                <!-- Categoría principal -->
+                                                <div class="mb-2">
+                                                    <label class="inline-flex items-center">
+                                                        <input type="radio" 
+                                                               name="categoria" 
+                                                               value="<%= category.id %>"
+                                                               class="form-radio text-purple-600 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray">
+                                                        <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                            <%= category.name %>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                                
+                                                <!-- Subcategorías -->
+                                                <% if (category.children && category.children.length > 0) { %>
+                                                    <% category.children.forEach(function(child) { %>
+                                                        <div class="mb-2 ml-6">
+                                                            <label class="inline-flex items-center">
+                                                                <span class="text-gray-400 mr-2">└─</span>
+                                                                <input type="radio" 
+                                                                       name="categoria" 
+                                                                       value="<%= child.id %>"
+                                                                       class="form-radio text-purple-600 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray">
+                                                                <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                                                                    <%= child.name %>
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                    <% }); %>
+                                                <% } %>
+                                            <% }); %>
+                                        <% } %>
+                                        
+                                        <% renderCategories(categories); %>
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Después de la categoría y antes de los tiempos -->
+                            <div class="mt-4">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 dark:text-gray-400">Dificultad</span>
+                                    <select name="dificultad" required
+                                        class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-select">
+                                        <option value="Fácil">Fácil</option>
+                                        <option value="Moderada" selected>Moderada</option>
+                                        <option value="Difícil">Difícil</option>
+                                        <option value="Extra Difícil">Extra Difícil</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <!-- Tiempos -->
+                            <div class="mt-4 grid gap-6 mb-8 md:grid-cols-3">
+                                <!-- Tiempo de preparación -->
+                                <div>
+                                    <label class="block text-sm">
+                                        <span class="text-gray-700 dark:text-gray-400">
+                                            Tiempo de preparación (min)
+                                        </span>
+                                        <input type="number" 
+                                               name="tiempoPreparacion" 
+                                               required 
+                                               min="1"
+                                               x-model="tiempoPreparacion"
+                                               @input="calculateTiempoTotal"
+                                               class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                        />
+                                    </label>
+                                </div>
+
+                                <!-- Tiempo de cocción -->
+                                <div>
+                                    <label class="block text-sm">
+                                        <span class="text-gray-700 dark:text-gray-400">
+                                            Tiempo de cocción (min)
+                                        </span>
+                                        <input type="number" 
+                                               name="tiempoCoccion" 
+                                               required 
+                                               min="0"
+                                               x-model="tiempoCoccion"
+                                               @input="calculateTiempoTotal"
+                                               class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                        />
+                                    </label>
+                                </div>
+
+                                <!-- Tiempo total (calculado automáticamente) -->
+                                <div>
+                                    <label class="block text-sm">
+                                        <span class="text-gray-700 dark:text-gray-400">
+                                            Tiempo total (min)
+                                        </span>
+                                        <input type="number" 
+                                               x-model="tiempoTotal"
+                                               disabled
+                                               class="block w-full mt-1 text-sm bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 form-input cursor-not-allowed"
+                                        />
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Botones -->
+                            <div class="flex justify-end mt-6 space-x-3">
+                                <a href="/"
+                                    class="px-4 py-2 text-sm font-medium leading-5 text-gray-700 transition-colors duration-150 border border-gray-300 rounded-lg dark:text-gray-400 active:bg-transparent hover:border-gray-500 focus:border-gray-500 active:text-gray-500 focus:outline-none focus:shadow-outline-gray">
+                                    Cancelar
+                                </a>
+                                <button type="submit"
+                                    class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
+                                    Crear Receta
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <%- include('../partials/footer') %>
+    </div>
+
+    <!-- Modal para crear categoría -->
+    <div x-show="$store.modal.isOpen('create-category')"
+         class="fixed inset-0 z-30 flex items-end bg-black bg-opacity-50 sm:items-center sm:justify-center"
+         style="display: none;">
+        
+        <div x-show="$store.modal.isOpen('create-category')"
+             x-transition:enter="transition ease-out duration-150"
+             x-transition:enter-start="opacity-0 transform translate-y-1/2"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0 transform translate-y-1/2"
+             @click.away="$store.modal.close('create-category')"
+             @keydown.escape="$store.modal.close('create-category')"
+             class="w-full px-6 py-4 overflow-hidden bg-white rounded-t-lg dark:bg-gray-800 sm:rounded-lg sm:m-4 sm:max-w-xl">
+            
+            <header class="flex justify-between">
+                <h2 class="text-xl font-medium text-gray-700 dark:text-gray-300">
+                    Nueva Categoría
+                </h2>
+                <button @click="$store.modal.close('create-category')"
+                        class="inline-flex items-center justify-center w-6 h-6 text-gray-400 transition-colors duration-150 rounded dark:hover:text-gray-200 hover:text-gray-700">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"></path>
+                    </svg>
+                </button>
+            </header>
+
+            <form id="createCategoryForm" 
+                  @submit.prevent="submitCategory"
+                  x-data="{ 
+                      name: '', 
+                      parentId: '',
+                      loading: false,
+                      async submitCategory() {
+                          this.loading = true;
+                          try {
+                              const response = await fetch('/categories/create', {
+                                  method: 'POST',
+                                  headers: {
+                                      'Content-Type': 'application/json',
+                                  },
+                                  body: JSON.stringify({
+                                      name: this.name,
+                                      parentId: this.parentId || null
+                                  })
+                              });
+                              
+                              if (response.ok) {
+                                  // Obtener las categorías actualizadas
+                                  const categoriesResponse = await fetch('/api/categories');
+                                  if (categoriesResponse.ok) {
+                                      const updatedCategories = await categoriesResponse.json();
+                                      // Actualizar la vista sin recargar la página
+                                      // Aquí necesitarás crear un endpoint que devuelva el HTML renderizado
+                                      const categoryListResponse = await fetch('/api/categories/render');
+                                      if (categoryListResponse.ok) {
+                                          const html = await categoryListResponse.text();
+                                          document.querySelector('.category-list-container').innerHTML = html;
+                                      }
+                                      $store.modal.close('create-category');
+                                      this.name = '';
+                                      this.parentId = '';
+                                  }
+                              } else {
+                                  throw new Error('Error al crear la categoría');
+                              }
+                          } catch (error) {
+                              console.error('Error:', error);
+                              alert('Error al crear la categoría');
+                          } finally {
+                              this.loading = false;
+                          }
+                      }
+                  }">
+                
+                <div class="mt-4">
+                    <label class="block text-sm">
+                        <span class="text-gray-700 dark:text-gray-400">Nombre de la categoría</span>
+                        <input x-model="name"
+                               class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                               type="text"
+                               required>
+                    </label>
+                </div>
+
+                <div class="mt-4">
+                    <label class="block text-sm">
+                        <span class="text-gray-700 dark:text-gray-400">Categoría padre (opcional)</span>
+                        <select x-model="parentId"
+                                class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-select">
+                            <option value="">Ninguna (Categoría principal)</option>
+                            <% categories.forEach(function(category) { %>
+                                <% if (!category.parentId) { // Solo mostrar categorías principales como posibles padres %>
+                                    <option value="<%= category.id %>"><%= category.name %></option>
+                                <% } %>
+                            <% }); %>
+                        </select>
+                    </label>
+                </div>
+
+                <footer class="mt-6 flex justify-end space-x-3">
+                    <button @click="$store.modal.close('create-category')"
+                            type="button"
+                            class="px-4 py-2 text-sm font-medium leading-5 text-gray-700 transition-colors duration-150 border border-gray-300 rounded-lg dark:text-gray-400 active:bg-transparent hover:border-gray-500 focus:border-gray-500 active:text-gray-500 focus:outline-none focus:shadow-outline-gray">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            :disabled="loading"
+                            class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+                            x-html="loading ? 'Creando...' : 'Crear Categoría'">
+                    </button>
+                </footer>
+            </form>
+        </div>
+    </div>
+
+    <!-- Añadir el store de modal si no existe -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('modal', {
+                modals: new Set(),
+                isOpen(modal) {
+                    return this.modals.has(modal)
+                },
+                open(modal) {
+                    this.modals.add(modal)
+                },
+                close(modal) {
+                    this.modals.delete(modal)
+                },
+            })
+        })
+
+        // Agregar el listener para el evento personalizado
+        window.addEventListener('open-modal', (event) => {
+            Alpine.store('modal').open('create-category');
+        });
+    </script>
+</body>
+</html> 

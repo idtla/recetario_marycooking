@@ -1,0 +1,116 @@
+<%- include('partials/header') %>
+
+<div class="flex h-screen bg-gray-50 dark:bg-gray-900">
+  <!-- Desktop sidebar -->
+  <aside class="z-20 hidden w-64 overflow-y-auto bg-white dark:bg-gray-800 md:block flex-shrink-0">
+    <%- include('partials/sidebar') %>
+  </aside>
+
+  <div class="flex flex-col flex-1 w-full">
+    <main class="h-full overflow-y-auto">
+      <div class="container px-6 mx-auto grid">
+        <!-- Cabecera con título y botón crear -->
+        <div class="flex justify-between items-center my-6">
+          <h2 class="text-2xl font-semibold text-gray-700 dark:text-gray-200">
+            Recetas Recientes
+          </h2>
+          <a href="/recipes/create" 
+             class="flex items-center justify-between px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
+            <svg class="w-4 h-4 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>Nueva Receta</span>
+          </a>
+        </div>
+
+        <!-- Cards -->
+        <div class="grid gap-8 mb-8 md:grid-cols-2 xl:grid-cols-3">
+          <% recipes.forEach(function(recipe) { %>
+            <a href="/recipes/<%= recipe.Category ? recipe.Category.slug : 'sin-categoria' %>/<%= recipe.slug %>" 
+               class="recipe-card block transform hover:scale-105 transition-all duration-200">
+              <div class="bg-white rounded-xl shadow-lg overflow-hidden dark:bg-gray-800">
+                <div class="relative">
+                  <% if (recipe.imagen) { %>
+                    <img src="<%= recipe.imagen %>" 
+                         alt="<%= recipe.titulo %>"
+                         class="w-full h-56 object-cover"
+                         onerror="this.src='/img/default-recipe.jpg'">
+                  <% } else { %>
+                    <img src="/img/default-recipe.jpg" 
+                         alt="Imagen por defecto"
+                         class="w-full h-56 object-cover">
+                  <% } %>
+                </div>
+                
+                <div class="p-6">
+                  <h4 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 line-clamp-1 hover:text-gray-900 dark:hover:text-gray-100">
+                    <%= recipe.titulo %>
+                  </h4>
+                  
+                  <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-4">
+                    <%= recipe.descripcion %>
+                  </p>
+                  
+                  <!-- Footer con categoría y etiquetas -->
+                  <div class="flex items-center justify-between">
+                    <!-- Categoría -->
+                    <span class="text-sm text-purple-600 dark:text-purple-400 font-medium">
+                      <%= recipe.Category ? recipe.Category.name : 'Sin categoría' %>
+                    </span>
+
+                    <div class="flex items-center space-x-2">
+                      <!-- Tiempo -->
+                      <div class="bg-gray-100 dark:bg-gray-700 rounded-full px-3 py-1 flex items-center">
+                        <svg class="w-4 h-4 mr-1 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          <%= recipe.tiempoTotal %> min
+                        </span>
+                      </div>
+                      
+                      <!-- Dificultad -->
+                      <% 
+                      const dificultadStyles = {
+                        'Fácil': {
+                          bg: 'bg-green-100 dark:bg-green-700',
+                          text: 'text-green-800 dark:text-green-100',
+                          icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                        },
+                        'Moderada': {
+                          bg: 'bg-orange-100 dark:bg-orange-700',
+                          text: 'text-orange-800 dark:text-orange-100',
+                          icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                        },
+                        'Difícil': {
+                          bg: 'bg-red-100 dark:bg-red-700',
+                          text: 'text-red-800 dark:text-red-100',
+                          icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>'
+                        },
+                        'Extra Difícil': {
+                          bg: 'bg-purple-100 dark:bg-purple-700',
+                          text: 'text-purple-800 dark:text-purple-100',
+                          icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z M12 9v2m0 4h.01"></path>'
+                        }
+                      };
+                      const style = dificultadStyles[recipe.dificultad];
+                      %>
+                      <div class="flex items-center <%= style.bg %> <%= style.text %> rounded-full px-3 py-1 font-semibold text-xs">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <%- style.icon %>
+                        </svg>
+                        <%= recipe.dificultad %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </a>
+          <% }); %>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<%- include('partials/footer') %> 

@@ -1,0 +1,52 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <h1>Mi Perfil</h1>
+  
+  <div class="row mt-4">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title"><%= user.nombre %></h5>
+          <p class="card-text">Email: <%= user.email %></p>
+          <a href="/users/edit" class="btn btn-primary">Editar Perfil</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-8">
+      <h2>Mis Recetas</h2>
+      <% if (recipes.length > 0) { %>
+        <div class="row">
+          <% recipes.forEach(recipe => { %>
+            <div class="col-md-6 mb-4">
+              <div class="card">
+                <% if (recipe.image) { %>
+                  <img src="<%= recipe.image %>" class="card-img-top" alt="<%= recipe.title %>">
+                <% } %>
+                <div class="card-body">
+                  <h5 class="card-title"><%= recipe.title %></h5>
+                  <p class="card-text">
+                    <small class="text-muted">
+                      Categoría: <%= recipe.category ? recipe.category.name : 'Sin categoría' %>
+                    </small>
+                  </p>
+                  <a href="/recipes/<%= recipe._id %>" class="btn btn-primary">Ver</a>
+                  <a href="/recipes/<%= recipe._id %>/edit" class="btn btn-secondary">Editar</a>
+                  <form action="/recipes/<%= recipe._id %>?_method=DELETE" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro?')">Eliminar</button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <p>Aún no has creado ninguna receta.</p>
+      <% } %>
+      <a href="/recipes/new" class="btn btn-success">Crear Nueva Receta</a>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %> 

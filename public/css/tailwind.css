@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Reset de estilos para enlaces */
+@layer base {
+  a {
+    @apply text-current;
+    text-decoration: none !important;
+  }
+  
+  a:hover {
+    @apply text-current;
+    text-decoration: none !important;
+  }
+}
+
+/* Estilos específicos para las cards de recetas */
+.recipe-card {
+  @apply text-current;
+}
+
+.recipe-card:hover {
+  @apply text-current;
+}
+
+.recipe-card:hover * {
+  @apply text-current;
+}
+
+/* Forzar colores específicos */
+.recipe-card h4,
+.recipe-card h4:hover,
+.recipe-card:hover h4 {
+  @apply text-gray-900 dark:text-gray-100;
+}
+
+.recipe-card p,
+.recipe-card p:hover,
+.recipe-card:hover p {
+  @apply text-gray-600 dark:text-gray-400;
+}

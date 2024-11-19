@@ -1,0 +1,40 @@
+{
+  "name": "recetario-web",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "env NODE_ENV=production postcss public/css/tailwind.css -o public/css/tailwind.output.css",
+    "tailwind": "tailwindcss build public/css/tailwind.css -o public/css/tailwind.output.css",
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "build:css": "tailwindcss -i ./public/css/tailwind.css -o ./public/css/tailwind.output.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.1",
+    "express-fileupload": "^1.5.1",
+    "express-session": "^1.18.1",
+    "method-override": "^3.0.0",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.4",
+    "sequelize": "^6.37.5",
+    "slugify": "^1.6.6"
+  },
+  "devDependencies": {
+    "@tailwindcss/custom-forms": "^0.2.1",
+    "autoprefixer": "^10.4.20",
+    "color": "^3.2.1",
+    "cssnano": "^7.0.6",
+    "postcss-cli": "^11.0.0",
+    "tailwindcss": "^1.4.6",
+    "tailwindcss-multi-theme": "^1.0.4"
+  },
+  "description": ""
+}

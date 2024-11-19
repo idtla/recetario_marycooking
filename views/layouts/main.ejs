@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html :class="{ 'theme-dark': dark }" x-data="data()" lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mary Cooking Recetario</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/img/favicon.png"/>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/tailwind.output.css" />
+    
+    <!-- Scripts -->
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="/assets/js/init-alpine.js"></script>
+    <script src="/js/charts-lines.js"></script>
+    <script src="/js/charts-pie.js"></script>
+    <script src="/js/charts-bars.js"></script>
+    <script src="/js/focus-trap.js"></script>
+  </head>
+  <body>
+    <div class="flex h-screen bg-gray-50 dark:bg-gray-900" :class="{ 'overflow-hidden': isSideMenuOpen }">
+        <!-- Desktop sidebar -->
+        <aside class="z-20 hidden w-64 overflow-y-auto bg-white dark:bg-gray-800 md:block flex-shrink-0">
+            <%- include('../partials/sidebar') %>
+        </aside>
+
+        <!-- Mobile sidebar -->
+        <div x-show="isSideMenuOpen" 
+             x-transition:enter="transition ease-in-out duration-150"
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in-out duration-150" 
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-10 flex items-end bg-black bg-opacity-50 sm:items-center sm:justify-center">
+        </div>
+        <aside class="fixed inset-y-0 z-20 flex-shrink-0 w-64 mt-16 overflow-y-auto bg-white dark:bg-gray-800 md:hidden"
+               x-show="isSideMenuOpen"
+               x-transition:enter="transition ease-in-out duration-150"
+               x-transition:enter-start="opacity-0 transform -translate-x-20"
+               x-transition:enter-end="opacity-100"
+               x-transition:leave="transition ease-in-out duration-150"
+               x-transition:leave-start="opacity-100"
+               x-transition:leave-end="opacity-0 transform -translate-x-20"
+               @click.away="closeSideMenu"
+               @keydown.escape="closeSideMenu">
+            <%- include('../partials/sidebar') %>
+        </aside>
+
+        <div class="flex flex-col flex-1 w-full">
+            <%- include('../partials/header') %>
+            <main class="h-full overflow-y-auto">
+                <%- body %>
+            </main>
+        </div>
+    </div>
+  </body>
+</html>

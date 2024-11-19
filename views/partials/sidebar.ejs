@@ -1,0 +1,57 @@
+<div class="py-4 text-gray-500 dark:text-gray-400">
+  <div class="px-6">
+    <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
+      Categorías
+    </h2>
+    
+    <nav class="categories-nav">
+      <ul class="space-y-4">
+        <% 
+        // Función para encontrar los hijos de una categoría
+        function findChildren(categories, parentId) {
+          return categories.filter(cat => cat.parentId === parentId);
+        }
+
+        // Encontrar categorías principales (sin parentId)
+        const mainCategories = categories.filter(cat => !cat.parentId);
+
+        mainCategories.forEach(function(mainCategory) { 
+          const children = findChildren(categories, mainCategory.id);
+        %>
+          <li>
+            <!-- Categoría principal -->
+            <a href="/categories/<%= mainCategory.slug %>" 
+               class="block text-lg font-semibold text-gray-800 hover:text-purple-600 dark:text-gray-200 dark:hover:text-purple-400">
+              <%= mainCategory.name %>
+            </a>
+            
+            <% if (children.length > 0) { %>
+              <!-- Subcategorías -->
+              <ul class="mt-2 ml-6 space-y-2">
+                <% children.forEach(function(child) { %>
+                  <li>
+                    <a href="/categories/<%= child.slug %>" 
+                       class="block text-gray-600 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-400">
+                      <%= child.name %>
+                    </a>
+                  </li>
+                <% }); %>
+              </ul>
+            <% } %>
+          </li>
+        <% }); %>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<style>
+.categories-nav ul li ul {
+  border-left: 2px solid #e2e8f0;
+  padding-left: 1rem;
+}
+
+.dark .categories-nav ul li ul {
+  border-left-color: #4a5568;
+}
+</style> 
