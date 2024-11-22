@@ -18,7 +18,7 @@ User.prototype.validPassword = function(password) {
 
 const authController = {
   showRegister: (req, res) => {
-    res.render('register');
+    res.render('pages/register');
   },
 
   register: async (req, res) => {
@@ -39,14 +39,14 @@ const authController = {
 
     } catch (error) {
       console.error('Error en registro:', error);
-      res.render('register', {
+      res.render('pages/register', {
         error: 'Error al crear la cuenta'
       });
     }
   },
 
   showLogin: (req, res) => {
-    res.render('login');
+    res.render('pages/login');
   },
 
   login: async (req, res) => {

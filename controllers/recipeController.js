@@ -269,4 +269,29 @@ exports.delete = async (req, res) => {
         console.error('Error al eliminar la receta:', error);
         res.status(500).render('error', { error: 'Error al eliminar la receta' });
     }
+};
+
+exports.edit = async (req, res) => {
+    try {
+        const recipe = await Recipe.findOne({
+            where: { slug: req.params.slug },
+            include: [{ model: Category, as: 'Category' }]
+        });
+
+        // Asegúrate de que la ruta de la imagen es correcta
+        if (recipe.imagen && !recipe.imagen.startsWith('/')) {
+            recipe.imagen = `/uploads/recipes/${recipe.imagen}`;
+        }
+
+        console.log('DATOS DE LA RECETA:', JSON.stringify(recipe, null, 2));
+
+        res.render('recipes/edit', {
+            recipe,
+            categories: await Category.findAll(),
+            error: null
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.redirect('/');
+    }
 }; 

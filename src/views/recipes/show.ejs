@@ -52,13 +52,13 @@
                 <div class="flex items-center justify-between p-6">
                     <div class="flex items-center space-x-4">
                         <!-- Tiempo -->
-                        <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full px-4 py-2">
+                        <div class="flex items-center bg-gray-100 rounded-full px-4 py-2">
                             <svg class="w-5 h-5 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            <span class="text-gray-700 dark:text-gray-300 font-medium">
-                                <%= recipe.tiempoTotal %> min
+                            <span class="text-gray-700 font-medium">
+                                <%= (recipe.tiempoPreparacion || 0) + (recipe.tiempoCoccion || 0) %> min
                             </span>
                         </div>
 

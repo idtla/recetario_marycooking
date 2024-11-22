@@ -13,14 +13,7 @@ app.use(express.static('public'));
 
 // Configuración de archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/uploads', express.static('uploads'));
-
-// Configuración específica para CSS
-app.use('/css', express.static(path.join(__dirname, 'public/css'), {
-    setHeaders: (res, path) => {
-        res.setHeader('Content-Type', 'text/css');
-    }
-}));
+app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 
 // Configuración de fileupload
 app.use(fileUpload({
@@ -42,7 +35,7 @@ app.use(session({
 
 // View engine
 app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'src', 'views'));
 
 // Middleware para variables globales
 app.use((req, res, next) => {
@@ -75,7 +68,8 @@ app.use((err, req, res, next) => {
 });
 
 // Iniciar servidor
-const sequelize = require('./config/database');
+const { database } = require('./src/config/paths');
+const sequelize = require(database);
 sequelize.sync()
     .then(() => {
         app.listen(process.env.PORT, () => {

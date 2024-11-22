@@ -1,4 +1,4 @@
-const sequelize = require('../config/database');
+const sequelize = require(process.cwd() + '/src/config/database');
 const Recipe = require('./Recipe');
 const Category = require('./Category');
 const User = require('./User');

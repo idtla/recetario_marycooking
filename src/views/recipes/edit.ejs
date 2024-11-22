@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Editar <%= recipe.titulo %> - Mary Cooking Recetario</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="/css/tailwind.output.css" />
+    <link rel="stylesheet" href="/assets/css/tailwind.output.css" />
     
     <!-- TinyMCE -->
     <script src="https://cdn.tiny.cloud/1/ujxekjwb4seln0txoaecg9eslfk2aa3vyhp60uyhmgly1evg/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
@@ -63,15 +63,15 @@
                         method="POST" 
                         enctype="multipart/form-data"
                         x-data="{ 
-                            titulo: '<%= recipe.titulo.replace(/'/g, "\\'") %>',
-                            descripcion: '<%= recipe.descripcion ? recipe.descripcion.replace(/'/g, "\\'") : "" %>',
-                            ingredientes: '<%= recipe.ingredientes ? recipe.ingredientes.replace(/'/g, "\\'").replace(/\n/g, "\\n") : "" %>',
-                            instrucciones: '<%= recipe.instrucciones ? recipe.instrucciones.replace(/'/g, "\\'").replace(/\n/g, "\\n") : "" %>',
-                            tiempoPreparacion: <%= recipe.tiempoPreparacion || 0 %>,
-                            tiempoCoccion: <%= recipe.tiempoCoccion || 0 %>,
-                            tiempoTotal: <%= recipe.tiempoTotal || 0 %>,
-                            dificultad: '<%= recipe.dificultad %>',
-                            porciones: <%= recipe.porciones || 0 %>,
+                            titulo: `<%- recipe.titulo ? recipe.titulo.replace(/`/g, '\\`') : '' %>`,
+                            descripcion: `<%- recipe.descripcion ? recipe.descripcion.replace(/`/g, '\\`') : '' %>`,
+                            ingredientes: `<%- recipe.ingredientes ? recipe.ingredientes.replace(/`/g, '\\`') : '' %>`,
+                            instrucciones: `<%- recipe.instrucciones ? recipe.instrucciones.replace(/`/g, '\\`') : '' %>`,
+                            tiempoPreparacion: <%- recipe.tiempoPreparacion || 0 %>,
+                            tiempoCoccion: <%- recipe.tiempoCoccion || 0 %>,
+                            tiempoTotal: <%- recipe.tiempoTotal || 0 %>,
+                            dificultad: `<%- recipe.dificultad || 'Moderada' %>`,
+                            porciones: <%- recipe.porciones || 4 %>,
                             calculateTiempoTotal() {
                                 this.tiempoTotal = parseInt(this.tiempoPreparacion || 0) + parseInt(this.tiempoCoccion || 0);
                             }
@@ -129,7 +129,7 @@
                                     <div class="grid grid-cols-5 gap-2 mt-2 mb-2">
                                         <% recipe.imagenesAdicionales.forEach(function(imagen) { %>
                                             <div class="relative">
-                                                <img src="<%= imagen %>" 
+                                                <img src="/assets/img/<%= imagen %>" 
                                                      alt="Imagen adicional" 
                                                      class="w-20 h-20 object-cover rounded">
                                             </div>
@@ -395,6 +395,19 @@
             console.error('Error:', error);
             alert('Error al crear la categoría');
         }
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Datos de la receta:', {
+            titulo: `<%- recipe.titulo %>`,
+            descripcion: `<%- recipe.descripcion %>`,
+            ingredientes: `<%- recipe.ingredientes %>`,
+            tiempoPreparacion: <%- recipe.tiempoPreparacion || 0 %>,
+            tiempoCoccion: <%- recipe.tiempoCoccion || 0 %>,
+            tiempoTotal: <%- recipe.tiempoTotal || 0 %>
+        });
     });
 </script>
 </body>

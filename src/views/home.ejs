@@ -26,15 +26,15 @@
         <!-- Cards -->
         <div class="grid gap-8 mb-8 md:grid-cols-2 xl:grid-cols-3">
           <% recipes.forEach(function(recipe) { %>
-            <a href="/recipes/<%= recipe.Category ? recipe.Category.slug : 'sin-categoria' %>/<%= recipe.slug %>" 
-               class="recipe-card block transform hover:scale-105 transition-all duration-200">
+            <a href="/recipes/<%= recipe.Category.slug %>/<%= recipe.slug %>" 
+               class="block text-inherit no-underline transform hover:scale-105 transition-transform duration-200">
               <div class="bg-white rounded-xl shadow-lg overflow-hidden dark:bg-gray-800">
                 <div class="relative">
                   <% if (recipe.imagen) { %>
                     <img src="<%= recipe.imagen %>" 
                          alt="<%= recipe.titulo %>"
                          class="w-full h-56 object-cover"
-                         onerror="this.src='/img/default-recipe.jpg'">
+                         onerror="this.src='/assets/img/default-recipe.jpg'">
                   <% } else { %>
                     <img src="/img/default-recipe.jpg" 
                          alt="Imagen por defecto"
