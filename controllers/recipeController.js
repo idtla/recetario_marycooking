@@ -134,15 +134,26 @@ exports.create = async (req, res) => {
         const { titulo, descripcion, ingredientes, instrucciones, categoria, dificultad, 
                 tiempoPreparacion, tiempoCoccion, porciones } = req.body;
 
-        // Crear el slug
-        const slug = slugify(titulo, { lower: true, strict: true });
+        // Crear el slug base y manejar duplicados
+        let baseSlug = slugify(titulo, { lower: true, strict: true });
+        let slug = baseSlug;
+        let counter = 1;
+
+        // Verificar si el slug existe y generar uno único
+        while (true) {
+            const existingRecipe = await Recipe.findOne({ where: { slug } });
+            if (!existingRecipe) break;
+            slug = `${baseSlug}-${counter}`;
+            counter++;
+        }
 
         // Manejar la imagen destacada
         let imagen = null;
         if (req.files && req.files.imagenDestacada) {
             const file = req.files.imagenDestacada;
             const fileName = `${Date.now()}-${file.name}`;
-            await file.mv(path.join(__dirname, '../public/uploads/recipes/', fileName));
+            const uploadPath = path.join(__dirname, '../public/uploads/recipes/', fileName);
+            await file.mv(uploadPath);
             imagen = `/uploads/recipes/${fileName}`;
         }
 
@@ -162,12 +173,22 @@ exports.create = async (req, res) => {
             slug
         });
 
-        res.redirect(`/recipes/${recipe.Category.slug}/${recipe.slug}`);
+        // Obtener la categoría para la redirección
+        const category = await Category.findByPk(categoria);
+        const categorySlug = category ? category.slug : 'sin-categoria';
+
+        res.redirect(`/recipes/${categorySlug}/${recipe.slug}`);
     } catch (error) {
         console.error('Error al crear la receta:', error);
+        
+        const categories = await Category.findAll({
+            include: [{ model: Category, as: 'children' }],
+            where: { parentId: null }
+        });
+
         res.render('recipes/create', { 
-            error: 'Error al crear la receta',
-            categories: await Category.findAll()
+            error: 'Error al crear la receta. Por favor, verifica los datos e intenta nuevamente.',
+            categories
         });
     }
 };
