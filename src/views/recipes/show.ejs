@@ -22,7 +22,7 @@
         </div>
 
         <!-- Formulario oculto para eliminar -->
-        <form id="deleteForm" action="/recipes/<%= recipe.Category.slug %>/<%= recipe.slug %>" method="POST" class="hidden">
+        <form id="deleteForm" action="/recipes/<%= recipe.Category.slug %>/<%= recipe.slug %>/delete" method="POST" class="hidden">
             <input type="hidden" name="_method" value="DELETE">
         </form>
 
