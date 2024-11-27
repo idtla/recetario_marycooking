@@ -59,7 +59,7 @@
 
                 <div class="bg-white rounded-lg shadow-md dark:bg-gray-800 p-6">
                     <form id="recipeForm" 
-                        action="/recipes/<%= recipe.Category.slug %>/<%= recipe.slug %>/update" 
+                        action="/recipes/<%= recipe.Category ? recipe.Category.slug : 'uncategorized' %>/<%= recipe.slug %>/update" 
                         method="POST" 
                         enctype="multipart/form-data"
                         x-data="{ 
@@ -286,7 +286,7 @@
 
                         <!-- Botones -->
                         <div class="flex justify-end mt-6 space-x-3">
-                            <a href="/recipes/<%= recipe.Category.slug %>/<%= recipe.slug %>"
+                            <a href="/recipes/<%= recipe.Category ? recipe.Category.slug : 'uncategorized' %>/<%= recipe.slug %>"
                                 class="px-4 py-2 text-sm font-medium leading-5 text-gray-700 transition-colors duration-150 border border-gray-300 rounded-lg dark:text-gray-400 active:bg-transparent hover:border-gray-500 focus:border-gray-500 active:text-gray-500 focus:outline-none focus:shadow-outline-gray">
                                 Cancelar
                             </a>
@@ -380,8 +380,7 @@
             });
 
             if (response.ok) {
-                // Actualizar la lista de categorías
-                const categoryListResponse = await fetch('/api/categories/render');
+                const categoryListResponse = await fetch('/api/recipes/categories/render');
                 if (categoryListResponse.ok) {
                     const html = await categoryListResponse.text();
                     document.querySelector('.category-list-container').innerHTML = html;

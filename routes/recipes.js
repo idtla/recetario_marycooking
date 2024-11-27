@@ -14,5 +14,6 @@ router.post('/:categorySlug/:slug/delete', recipeController.delete);
 // Rutas de visualización
 router.get('/:categorySlug/:slug', recipeController.getRecipeBySlug);
 router.get('/', recipeController.getAllRecipes);
+router.get('/uncategorized', recipeController.getUncategorizedRecipes);
 
 module.exports = router; 

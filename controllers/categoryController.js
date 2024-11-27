@@ -51,23 +51,38 @@ exports.manageCategories = async (req, res) => {
 exports.createCategory = async (req, res) => {
     try {
         const { name, parentId } = req.body;
-        
         const slug = slugify(name, {
             lower: true,
             strict: true
         });
 
-        await Category.create({
+        const category = await Category.create({
             name,
             slug,
             parentId: parentId || null
         });
 
-        res.json({ 
+        const newCategory = await Category.findByPk(category.id, {
+            include: [{ model: Category, as: 'children' }]
+        });
+
+        res.status(201).json({ 
             success: true, 
-            message: 'Categoría creada correctamente' 
+            message: 'Categoría creada correctamente',
+            category: newCategory
         });
     } catch (error) {
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            const category = await Category.findOne({ where: { slug: slugify(req.body.name, { lower: true, strict: true }) } });
+            if (category) {
+                return res.status(201).json({
+                    success: true,
+                    message: 'Categoría creada correctamente',
+                    category: category
+                });
+            }
+        }
+        
         console.error('Error al crear categoría:', error);
         res.status(500).json({ 
             error: 'Error al crear la categoría',
