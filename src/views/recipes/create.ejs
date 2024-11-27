@@ -7,36 +7,36 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/tailwind.output.css" />
     
-    <!-- TinyMCE -->
-    <script src="https://cdn.tiny.cloud/1/ujxekjwb4seln0txoaecg9eslfk2aa3vyhp60uyhmgly1evg/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            tinymce.init({
-                selector: '#instrucciones',
-                plugins: [
-                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                    'insertdatetime', 'media', 'table', 'help', 'wordcount'
-                ],
-                toolbar: 'undo redo | blocks | ' +
-                        'bold italic backcolor | alignleft aligncenter ' +
-                        'alignright alignjustify | bullist numlist outdent indent | ' +
-                        'removeformat | help',
-                height: 400,
-                language: 'es',
-                menubar: true,
-                branding: false,
-                promotion: false,
-                readonly: false,
-                content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 16px; }',
-                setup: function(editor) {
-                    editor.on('change', function() {
-                        editor.save();
-                    });
-                }
-            });
+<!-- TinyMCE -->
+<script src="https://cdn.tiny.cloud/1/ujxekjwb4seln0txoaecg9eslfk2aa3vyhp60uyhmgly1evg/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        tinymce.init({
+            selector: '#instrucciones',
+            plugins: [
+                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                'insertdatetime', 'media', 'table', 'help', 'wordcount'
+            ],
+            toolbar: 'undo redo | blocks | ' +
+                    'bold italic backcolor | alignleft aligncenter ' +
+                    'alignright alignjustify | bullist numlist outdent indent | ' +
+                    'removeformat | help',
+            height: 400,
+            language: 'es',
+            menubar: true,
+            branding: false,
+            promotion: false,
+            readonly: false,
+            content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 16px; }',
+            setup: function(editor) {
+                editor.on('change', function() {
+                    editor.save();
+                });
+            }
         });
-    </script>
+    });
+</script>
     
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -400,21 +400,14 @@
                               });
                               
                               if (response.ok) {
-                                  // Obtener las categorías actualizadas
-                                  const categoriesResponse = await fetch('/api/categories');
-                                  if (categoriesResponse.ok) {
-                                      const updatedCategories = await categoriesResponse.json();
-                                      // Actualizar la vista sin recargar la página
-                                      // Aquí necesitarás crear un endpoint que devuelva el HTML renderizado
-                                      const categoryListResponse = await fetch('/api/categories/render');
-                                      if (categoryListResponse.ok) {
-                                          const html = await categoryListResponse.text();
-                                          document.querySelector('.category-list-container').innerHTML = html;
-                                      }
-                                      $store.modal.close('create-category');
-                                      this.name = '';
-                                      this.parentId = '';
+                                  const categoryListResponse = await fetch('/api/recipes/categories/render');
+                                  if (categoryListResponse.ok) {
+                                      const html = await categoryListResponse.text();
+                                      document.querySelector('.category-list-container').innerHTML = html;
                                   }
+                                  $store.modal.close('create-category');
+                                  this.name = '';
+                                  this.parentId = '';
                               } else {
                                   throw new Error('Error al crear la categoría');
                               }

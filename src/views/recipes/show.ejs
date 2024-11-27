@@ -4,7 +4,7 @@
     <div class="max-w-4xl mx-auto my-8">
         <!-- Botones de acción -->
         <div class="flex justify-end mb-6 space-x-4">
-            <a href="/recipes/<%= recipe.Category.slug %>/<%= recipe.slug %>/edit" 
+            <a href="/recipes/<%= recipe.Category ? recipe.Category.slug : 'uncategorized' %>/<%= recipe.slug %>/edit" 
                class="flex items-center px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
@@ -22,7 +22,7 @@
         </div>
 
         <!-- Formulario oculto para eliminar -->
-        <form id="deleteForm" action="/recipes/<%= recipe.Category.slug %>/<%= recipe.slug %>/delete" method="POST" class="hidden">
+        <form id="deleteForm" action="/recipes/<%= recipe.Category ? recipe.Category.slug : 'uncategorized' %>/<%= recipe.slug %>" method="POST" class="hidden">
             <input type="hidden" name="_method" value="DELETE">
         </form>
 

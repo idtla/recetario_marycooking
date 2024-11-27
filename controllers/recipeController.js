@@ -20,49 +20,41 @@ exports.getAllRecipes = async (req, res) => {
 
 exports.getRecipeBySlug = async (req, res) => {
     try {
-        console.log('Buscando receta:', req.params);
-        const recipe = await Recipe.findOne({
-            where: { 
-                slug: req.params.slug 
-            },
-            include: [
-                { 
-                    model: Category, 
-                    as: 'Category',
-                    where: { slug: req.params.categorySlug }
+        let recipe;
+        if (req.params.categorySlug === 'uncategorized') {
+            recipe = await Recipe.findOne({
+                where: { 
+                    slug: req.params.slug,
+                    categoryId: null  // Específicamente buscamos recetas sin categoría
                 },
-                { 
-                    model: User, 
-                    as: 'User' 
-                }
-            ]
-        });
-
-        if (!recipe) {
-            console.log('Receta no encontrada');
-            return res.status(404).render('404', { error: 'Receta no encontrada' });
+                include: [
+                    { model: User, as: 'User' }
+                ]
+            });
+        } else {
+            // Mantener la búsqueda original para recetas con categoría
+            recipe = await Recipe.findOne({
+                include: [
+                    {
+                        model: Category,
+                        as: 'Category',
+                        where: { slug: req.params.categorySlug }
+                    },
+                    { model: User, as: 'User' }
+                ],
+                where: { slug: req.params.slug }
+            });
         }
 
-        recipe.instrucciones = recipe.instrucciones
-            .replace(/&ntilde;/g, 'ñ')
-            .replace(/&aacute;/g, 'á')
-            .replace(/&eacute;/g, 'é')
-            .replace(/&iacute;/g, 'í')
-            .replace(/&oacute;/g, 'ó')
-            .replace(/&uacute;/g, 'ú')
-            .replace(/&Aacute;/g, 'Á')
-            .replace(/&Eacute;/g, 'É')
-            .replace(/&Iacute;/g, 'Í')
-            .replace(/&Oacute;/g, 'Ó')
-            .replace(/&Uacute;/g, 'Ú')
-            .replace(/<p>/g, '<p class="mb-4">')
-            .replace(/<strong>/g, '<strong class="font-bold">');
+        if (!recipe) {
+            return res.redirect('/'); // Redirigir a home en lugar de intentar renderizar 404
+        }
 
-        console.log('Receta encontrada:', recipe.titulo);
         res.render('recipes/show', { recipe });
+
     } catch (error) {
-        console.error('Error al cargar la receta:', error);
-        res.status(500).render('error', { error: 'Error al cargar la receta' });
+        console.error('Error:', error);
+        res.redirect('/');
     }
 };
 
@@ -134,30 +126,17 @@ exports.create = async (req, res) => {
         const { titulo, descripcion, ingredientes, instrucciones, categoria, dificultad, 
                 tiempoPreparacion, tiempoCoccion, porciones } = req.body;
 
-        // Crear el slug base y manejar duplicados
-        let baseSlug = slugify(titulo, { lower: true, strict: true });
-        let slug = baseSlug;
-        let counter = 1;
-
-        // Verificar si el slug existe y generar uno único
-        while (true) {
-            const existingRecipe = await Recipe.findOne({ where: { slug } });
-            if (!existingRecipe) break;
-            slug = `${baseSlug}-${counter}`;
-            counter++;
-        }
+        const slug = slugify(titulo, { lower: true, strict: true });
 
         // Manejar la imagen destacada
         let imagen = null;
         if (req.files && req.files.imagenDestacada) {
             const file = req.files.imagenDestacada;
             const fileName = `${Date.now()}-${file.name}`;
-            const uploadPath = path.join(__dirname, '../public/uploads/recipes/', fileName);
-            await file.mv(uploadPath);
+            await file.mv(path.join(__dirname, '../public/uploads/recipes/', fileName));
             imagen = `/uploads/recipes/${fileName}`;
         }
 
-        // Crear la receta
         const recipe = await Recipe.create({
             titulo,
             descripcion,
@@ -173,21 +152,26 @@ exports.create = async (req, res) => {
             slug
         });
 
-        // Obtener la categoría para la redirección
-        const category = await Category.findByPk(categoria);
-        const categorySlug = category ? category.slug : 'sin-categoria';
+        // Obtener la receta recién creada con su categoría
+        const createdRecipe = await Recipe.findOne({
+            where: { id: recipe.id },
+            include: [{ model: Category, as: 'Category' }]
+        });
 
-        res.redirect(`/recipes/${categorySlug}/${recipe.slug}`);
+        // Construir la URL de redirección
+        const redirectPath = createdRecipe.categoryId 
+            ? `/recipes/${createdRecipe.Category.slug}/${createdRecipe.slug}`
+            : `/recipes/uncategorized/${createdRecipe.slug}`;
+
+        res.redirect(redirectPath);
     } catch (error) {
         console.error('Error al crear la receta:', error);
-        
         const categories = await Category.findAll({
             include: [{ model: Category, as: 'children' }],
             where: { parentId: null }
         });
-
         res.render('recipes/create', { 
-            error: 'Error al crear la receta. Por favor, verifica los datos e intenta nuevamente.',
+            error: 'Error al crear la receta',
             categories
         });
     }
@@ -314,5 +298,26 @@ exports.edit = async (req, res) => {
     } catch (error) {
         console.error('Error:', error);
         res.redirect('/');
+    }
+};
+
+exports.getUncategorizedRecipes = async (req, res) => {
+    try {
+        const recipes = await Recipe.findAll({
+            where: {
+                categoryId: null
+            }
+        });
+
+        // Usamos la vista home pero sin categorías en el sidebar
+        res.render('home', { 
+            recipes,
+            categories: [], // Enviamos un array vacío para que no muestre categorías
+            title: 'Recetas sin categoría'
+        });
+
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send('Error al cargar las recetas sin categoría');
     }
 }; 

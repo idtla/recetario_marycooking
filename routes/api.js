@@ -1,23 +1,18 @@
-router.get('/categories/render', async (req, res) => {
-    try {
-        const allCategories = await Category.findAll({
-            attributes: ['id', 'name', 'parentId'],
-            raw: true
-        });
-        
-        // Función para construir el árbol de categorías
-        const buildCategoryTree = (categories, parentId = null, level = 0) => {
-            if (level > 1) return [];
-            
-            return categories
-                .filter(cat => cat.parentId === parentId)
-                .map(cat => ({
-                    ...cat,
-                    children: buildCategoryTree(categories, cat.id, level + 1)
-                }));
-        };
+const express = require('express');
+const router = express.Router();
+const { Category } = require('../models');
 
-        const categories = buildCategoryTree(allCategories);
+router.get('/recipes/categories/render', async (req, res) => {
+    try {
+        const categories = await Category.findAll({
+            include: [{ 
+                model: Category, 
+                as: 'children' 
+            }],
+            where: { 
+                parentId: null 
+            }
+        });
         
         res.render('partials/category-list', { 
             categories: categories,
@@ -27,4 +22,6 @@ router.get('/categories/render', async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener categorías' });
     }
-}); 
+});
+
+module.exports = router; 

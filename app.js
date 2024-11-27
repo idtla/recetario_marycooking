@@ -50,6 +50,7 @@ const authRoutes = require('./routes/auth');
 const homeRoutes = require('./routes/home');
 const recipeRoutes = require('./routes/recipes');
 const categoryRoutes = require('./routes/categories');
+const apiRouter = require('./routes/api');
 
 const { isAuthenticated } = require('./middlewares/auth');
 
@@ -60,6 +61,7 @@ app.use('/auth', authRoutes);
 app.use('/', isAuthenticated, homeRoutes);
 app.use('/recipes', isAuthenticated, recipeRoutes);
 app.use('/categories', isAuthenticated, categoryRoutes);
+app.use('/api', apiRouter);
 
 // Manejo de errores
 app.use((err, req, res, next) => {
