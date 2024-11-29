@@ -64,8 +64,8 @@
                         <svg class="w-4 h-4 mr-1 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          <%= recipe.tiempoTotal %> min
+                        <span class="text-sm text-gray-600 dark:text-gray-400">
+                          <%= (recipe.tiempoPreparacion || 0) + (recipe.tiempoCoccion || 0) %> min
                         </span>
                       </div>
                       
