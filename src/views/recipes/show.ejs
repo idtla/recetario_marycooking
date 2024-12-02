@@ -95,9 +95,10 @@
                     </div>
 
                     <!-- Categoría -->
-                    <span class="px-4 py-2 bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100 rounded-full font-medium">
+                    <a href="/categories/<%= recipe.Category ? recipe.Category.slug : 'uncategorized' %>" 
+                       class="px-4 py-2 bg-purple-100 text-purple-800 dark:bg-purple-800 dark:text-purple-100 rounded-full font-medium hover:bg-purple-200 dark:hover:bg-purple-700 transition-colors duration-150">
                         <%= recipe.Category ? recipe.Category.name : 'Sin categoría' %>
-                    </span>
+                    </a>
                 </div>
             </div>
 
