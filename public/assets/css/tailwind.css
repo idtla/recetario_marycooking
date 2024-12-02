@@ -5,17 +5,24 @@
 /* Reset de estilos para enlaces */
 @layer base {
   a {
-    @apply text-current;
-    text-decoration: none !important;
+    @apply text-current no-underline !important;
   }
   
   a:hover {
-    @apply text-current;
-    text-decoration: none !important;
+    @apply text-current no-underline !important;
   }
 }
 
-/* Estilos específicos para las cards de recetas */
+/* Estilos específicos para las categorías */
+.categories-nav a {
+  @apply transition-colors duration-150;
+}
+
+.categories-nav a:hover {
+  @apply text-purple-600 dark:text-purple-400;
+}
+
+/* Forzar colores específicos */
 .recipe-card {
   @apply text-current;
 }

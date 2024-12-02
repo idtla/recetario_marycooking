@@ -1,28 +1,44 @@
 const { Category, Recipe } = require('../models');
-const slugify = require('slugify');
 
-exports.getAllCategories = async (req, res) => {
+exports.getBySlug = async (req, res) => {
     try {
+        const category = await Category.findOne({
+            where: { slug: req.params.slug }
+        });
+
+        if (!category) {
+            return res.redirect('/');
+        }
+
+        // Obtener todas las categorías para el sidebar
         const categories = await Category.findAll({
-            include: [
-                {
-                    model: Category,
-                    as: 'children',
-                    include: [Recipe]
-                },
-                Recipe
-            ],
-            where: {
-                parentId: null
-            }
+            order: [['name', 'ASC']]
         });
-        res.render('categories/index', { categories, error: null });
+
+        // Obtener IDs de categorías hijas
+        const childCategories = await Category.findAll({
+            where: { parentId: category.id }
+        });
+        
+        const categoryIds = [category.id, ...childCategories.map(cat => cat.id)];
+
+        // Obtener recetas de la categoría y sus hijas
+        const recipes = await Recipe.findAll({
+            where: { 
+                categoryId: categoryIds 
+            },
+            include: [{ model: Category, as: 'Category' }]
+        });
+
+        res.render('home', {
+            recipes,
+            categories,
+            currentCategory: category
+        });
+        
     } catch (error) {
-        console.error(error);
-        res.render('categories/index', { 
-            categories: [], 
-            error: 'Error al cargar las categorías' 
-        });
+        console.error('Error:', error);
+        res.redirect('/');
     }
 };
 
@@ -30,122 +46,16 @@ exports.manageCategories = async (req, res) => {
     try {
         const categories = await Category.findAll({
             order: [
-                ['name', 'ASC']
+                ['name', 'ASC'],
+                ['parentId', 'ASC']
             ]
         });
         
-        res.render('categories/manage', { 
-            categories, 
-            error: null,
-            user: req.session.user
-        });
+        res.render('categories/manage', { categories });
     } catch (error) {
-        console.error(error);
+        console.error('Error:', error);
         res.status(500).render('error', { 
-            error: 'Error al cargar la página de gestión de categorías',
-            user: req.session.user
+            message: 'Error al cargar las categorías'
         });
-    }
-};
-
-exports.createCategory = async (req, res) => {
-    try {
-        const { name, parentId } = req.body;
-        const slug = slugify(name, {
-            lower: true,
-            strict: true
-        });
-
-        const category = await Category.create({
-            name,
-            slug,
-            parentId: parentId || null
-        });
-
-        const newCategory = await Category.findByPk(category.id, {
-            include: [{ model: Category, as: 'children' }]
-        });
-
-        res.status(201).json({ 
-            success: true, 
-            message: 'Categoría creada correctamente',
-            category: newCategory
-        });
-    } catch (error) {
-        if (error.name === 'SequelizeUniqueConstraintError') {
-            const category = await Category.findOne({ where: { slug: slugify(req.body.name, { lower: true, strict: true }) } });
-            if (category) {
-                return res.status(201).json({
-                    success: true,
-                    message: 'Categoría creada correctamente',
-                    category: category
-                });
-            }
-        }
-        
-        console.error('Error al crear categoría:', error);
-        res.status(500).json({ 
-            error: 'Error al crear la categoría',
-            details: error.message 
-        });
-    }
-};
-
-exports.updateCategory = async (req, res) => {
-    try {
-        const { name, parentId } = req.body;
-        const categoryId = req.params.id;
-        
-        const category = await Category.findByPk(categoryId);
-        if (!category) {
-            return res.status(404).json({ 
-                error: 'Categoría no encontrada' 
-            });
-        }
-
-        if (parentId && categoryId === parentId) {
-            return res.status(400).json({ 
-                error: 'Una categoría no puede ser su propia categoría padre' 
-            });
-        }
-
-        const slug = slugify(name, {
-            lower: true,
-            strict: true
-        });
-
-        await Category.update(
-            { 
-                name,
-                slug,
-                parentId: parentId || null 
-            },
-            { 
-                where: { id: categoryId } 
-            }
-        );
-        
-        res.json({ 
-            success: true, 
-            message: 'Categoría actualizada correctamente' 
-        });
-    } catch (error) {
-        console.error('Error al actualizar categoría:', error);
-        res.status(500).json({ 
-            error: 'Error al actualizar la categoría',
-            details: error.message 
-        });
-    }
-};
-
-exports.deleteCategory = async (req, res) => {
-    try {
-        await Category.destroy({
-            where: { id: req.params.id }
-        });
-        res.redirect('/categories/manage');
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Error al eliminar la categoría' });
     }
 }; 

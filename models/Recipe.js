@@ -27,11 +27,6 @@ const Recipe = sequelize.define('recetas', {
         type: DataTypes.TEXT('long'),
         allowNull: false
     },
-    categoria: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
-        defaultValue: 'Sin categoría'
-    },
     imagen: {
         type: DataTypes.STRING(255),
         allowNull: true
@@ -86,7 +81,11 @@ const Recipe = sequelize.define('recetas', {
     },
     categoryId: {
         type: DataTypes.INTEGER,
-        allowNull: true
+        allowNull: true,
+        references: {
+            model: 'categorias',
+            key: 'id'
+        }
     },
     slug: {
         type: DataTypes.STRING(255),
