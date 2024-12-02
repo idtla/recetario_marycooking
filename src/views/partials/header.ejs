@@ -50,11 +50,24 @@
       </div>
 
       <ul class="flex items-center flex-shrink-0 space-x-6">
+        <!-- Nueva Receta -->
+        <% if (locals.user) { %>
+          <li class="flex">
+            <a href="/recipes/create" 
+               class="flex items-center justify-between px-4 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
+              <svg class="w-4 h-4 mr-2 -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+              <span>Nueva Receta</span>
+            </a>
+          </li>
+        <% } %>
+
         <!-- Manage Categories -->
         <% if (locals.user) { %>
           <li class="flex">
             <a href="/categories/manage" 
-               class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-md active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
+               class="flex items-center justify-between px-4 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
               Gestionar Categorías
             </a>
           </li>
