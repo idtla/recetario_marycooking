@@ -96,7 +96,7 @@
                             id="categoryParent"
                             class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-select">
                         <option value="">Ninguna (Categoría principal)</option>
-                        <% categories.forEach(function(category) { %>
+                        <% parentCategories.forEach(function(category) { %>
                             <option value="<%= category.id %>"><%= category.name %></option>
                         <% }); %>
                     </select>
@@ -143,7 +143,25 @@
 
     function deleteCategory(id) {
         if (confirm('¿Estás seguro de que deseas eliminar esta categoría?')) {
-            window.location.href = `/categories/delete/${id}`;
+            fetch(`/categories/delete/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(error => {
+                        throw new Error(error.error || 'Error al eliminar la categoría');
+                    });
+                }
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message);
+            });
         }
     }
 
