@@ -21,7 +21,7 @@
           <li>
             <!-- Categoría principal -->
             <a href="/categories/<%= mainCategory.slug %>" 
-               class="block text-lg font-semibold text-gray-800 hover:text-purple-600 dark:text-gray-200 dark:hover:text-purple-400">
+               class="block text-lg font-semibold <%= locals.currentCategory && locals.currentCategory.id === mainCategory.id ? 'text-purple-600 dark:text-purple-400' : 'text-gray-800 hover:text-purple-600 dark:text-gray-200 dark:hover:text-purple-400' %>">
               <%= mainCategory.name %>
             </a>
             
