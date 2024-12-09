@@ -1,5 +1,5 @@
 const { Recipe, Category } = require('../models');
-const { Op } = require('sequelize');
+const { Op, Sequelize } = require('sequelize');
 
 exports.search = async (req, res) => {
   const query = req.query.q;
@@ -9,8 +9,8 @@ exports.search = async (req, res) => {
       Recipe.findAll({
         where: {
           [Op.or]: [
-            { titulo: { [Op.like]: `%${query}%` } },
-            { descripcion: { [Op.like]: `%${query}%` } }
+            Sequelize.where(Sequelize.fn('BINARY', Sequelize.col('titulo')), 'LIKE', `%${query}%`),
+            Sequelize.where(Sequelize.fn('BINARY', Sequelize.col('descripcion')), 'LIKE', `%${query}%`)
           ]
         },
         include: [{
