@@ -1,6 +1,6 @@
 module.exports = {
-  purge: [
-    './views/**/*.ejs',
+  content: [
+    './src/views/**/*.ejs',
   ],
   theme: {
     extend: {},

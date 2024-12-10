@@ -83,7 +83,7 @@
                             <span class="text-gray-700 dark:text-gray-400">Título</span>
                             <input
                                 x-model="titulo"
-                                class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray form-input"
+                                class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-pink-400 focus:outline-none focus:shadow-outline-pink dark:focus:shadow-outline-gray form-input"
                                 name="titulo"
                                 type="text"
                                 value="<%= recipe.titulo %>"
@@ -97,7 +97,7 @@
                                 <span class="text-gray-700 dark:text-gray-400">Descripción</span>
                                 <textarea
                                     x-model="descripcion"
-                                    class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray form-textarea"
+                                    class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-pink-400 focus:outline-none focus:shadow-outline-pink dark:focus:shadow-outline-gray form-textarea"
                                     name="descripcion"
                                     rows="3"
                                     required
@@ -117,7 +117,7 @@
                                 <input type="file" 
                                        name="imagenDestacada" 
                                        accept="image/*"
-                                       class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                       class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-pink-400 focus:outline-none focus:shadow-outline-pink dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
                                 />
                             </label>
                         </div>
@@ -147,7 +147,7 @@
                                        name="imagenesAdicionales" 
                                        multiple 
                                        accept="image/*"
-                                       class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray">
+                                       class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-pink-400 focus:outline-none focus:shadow-outline-pink dark:focus:shadow-outline-gray">
                             </label>
                         </div>
 
@@ -157,7 +157,7 @@
                                 <span class="text-gray-700 dark:text-gray-400">Ingredientes (uno por línea)</span>
                                 <textarea
                                     x-model="ingredientes"
-                                    class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray form-textarea"
+                                    class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-pink-400 focus:outline-none focus:shadow-outline-pink dark:focus:shadow-outline-gray form-textarea"
                                     name="ingredientes"
                                     rows="5"
                                     required
@@ -184,7 +184,7 @@
                                 <div class="flex justify-between items-center mb-2">
                                     <button @click="$dispatch('open-modal', 'create-category')" 
                                             type="button"
-                                            class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
+                                            class="px-3 py-1 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-pink-600 border border-transparent rounded-lg active:bg-pink-600 hover:bg-pink-700 focus:outline-none focus:shadow-outline-pink">
                                         + Nueva Categoría
                                     </button>
                                 </div>
@@ -197,7 +197,7 @@
                                                            name="categoria" 
                                                            value="<%= category.id %>"
                                                            <%= recipe.categoryId === category.id ? 'checked' : '' %>
-                                                           class="form-radio text-purple-600 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray">
+                                                           class="form-radio text-pink-600 focus:border-pink-400 focus:outline-none focus:shadow-outline-pink dark:focus:shadow-outline-gray">
                                                     <span class="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                                                         <%= category.name %>
                                                     </span>
@@ -222,7 +222,7 @@
                             <label class="block text-sm">
                                 <span class="text-gray-700 dark:text-gray-400">Dificultad</span>
                                 <select name="dificultad" required
-                                    class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-select">
+                                    class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-pink-400 focus:outline-none focus:shadow-outline-pink dark:text-gray-300 dark:focus:shadow-outline-gray form-select">
                                     <option value="Fácil" <%= recipe.dificultad.nombre === 'Fácil' ? 'selected' : '' %>>Fácil</option>
                                     <option value="Moderada" <%= recipe.dificultad.nombre === 'Moderada' ? 'selected' : '' %>>Moderada</option>
                                     <option value="Difícil" <%= recipe.dificultad.nombre === 'Difícil' ? 'selected' : '' %>>Difícil</option>
@@ -246,7 +246,7 @@
                                            value="<%= recipe.tiempoPreparacion %>"
                                            x-model="tiempoPreparacion"
                                            @input="calculateTiempoTotal"
-                                           class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                           class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-pink-400 focus:outline-none focus:shadow-outline-pink dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
                                     />
                                 </label>
                             </div>
@@ -264,7 +264,7 @@
                                            value="<%= recipe.tiempoCoccion %>"
                                            x-model="tiempoCoccion"
                                            @input="calculateTiempoTotal"
-                                           class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                                           class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-pink-400 focus:outline-none focus:shadow-outline-pink dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
                                     />
                                 </label>
                             </div>
@@ -291,7 +291,7 @@
                                 Cancelar
                             </a>
                             <button type="submit"
-                                class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
+                                class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-pink-600 border border-transparent rounded-lg active:bg-pink-600 hover:bg-pink-700 focus:outline-none focus:shadow-outline-pink">
                                 Guardar Cambios
                             </button>
                         </div>
@@ -317,7 +317,7 @@
                         <input type="text" 
                                name="name" 
                                required
-                               class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
+                               class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-pink-400 focus:outline-none focus:shadow-outline-pink dark:text-gray-300 dark:focus:shadow-outline-gray form-input"
                     />
                 </label>
             </div>
@@ -326,7 +326,7 @@
                 <label class="block text-sm">
                     <span class="text-gray-700 dark:text-gray-400">Categoría Padre (opcional)</span>
                     <select name="parentId"
-                        class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray form-select"
+                        class="block w-full mt-1 text-sm dark:border-gray-600 dark:bg-gray-700 focus:border-pink-400 focus:outline-none focus:shadow-outline-pink dark:text-gray-300 dark:focus:shadow-outline-gray form-select"
                     >
                         <option value="">Ninguna (Categoría principal)</option>
                         <% categories.forEach(function(category) { %>
@@ -344,7 +344,7 @@
                     Cancelar
                 </button>
                 <button type="submit"
-                    class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple">
+                    class="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-pink-600 border border-transparent rounded-lg active:bg-pink-600 hover:bg-pink-700 focus:outline-none focus:shadow-outline-pink">
                     Crear
                 </button>
             </div>

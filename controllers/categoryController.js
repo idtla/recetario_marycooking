@@ -41,28 +41,23 @@ exports.getBySlug = async (req, res) => {
 
 exports.manageCategories = async (req, res) => {
     try {
-        const categories = await Category.findAll({
-            include: [{
-                model: Category,
-                as: 'children'
-            }],
-            order: [
-                ['name', 'ASC']
-            ]
-        });
-
-        const parentCategories = await Category.findAll({
+        const mainCategories = await Category.findAll({
             where: {
                 parentId: null
             },
+            include: [{
+                model: Category,
+                as: 'children',
+                required: false
+            }],
             order: [
-                ['name', 'ASC']
+                ['name', 'ASC'],
+                [{ model: Category, as: 'children' }, 'name', 'ASC']
             ]
         });
         
         res.render('categories/manage', { 
-            categories,
-            parentCategories,
+            categories: mainCategories,
             error: null 
         });
     } catch (error) {

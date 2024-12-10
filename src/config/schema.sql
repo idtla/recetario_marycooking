@@ -3,12 +3,12 @@ USE recetario;
 
 CREATE TABLE IF NOT EXISTS Users (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  username VARCHAR(255) NOT NULL UNIQUE,
   email VARCHAR(255) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
-  nombre VARCHAR(255) NOT NULL,
-  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  nombre VARCHAR(100),
+  created_at DATETIME NOT NULL,
+  rol ENUM('Admin', 'Editor', 'Usuario') NOT NULL DEFAULT 'Usuario',
+  estado ENUM('Activo', 'Inactivo', 'Pendiente') NOT NULL DEFAULT 'Pendiente'
 );
 
 CREATE TABLE IF NOT EXISTS Categories (

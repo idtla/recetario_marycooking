@@ -19,6 +19,16 @@ const User = sequelize.define('usuarios', {
     nombre: {
         type: DataTypes.STRING(100),
         allowNull: true
+    },
+    estado: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'Activo'
+    },
+    rol: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'Editor'
     }
 }, {
     timestamps: false,

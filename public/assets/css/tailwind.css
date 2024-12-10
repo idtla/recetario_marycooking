@@ -11,6 +11,47 @@
   a:hover {
     @apply text-current no-underline !important;
   }
+
+  /* Forzar colores de fondo para botones */
+  button.bg-pink-500,
+  button.bg-pink-600,
+  a.bg-pink-600 {
+    background-color: #EC4899 !important;
+  }
+
+  button.hover\:bg-pink-600:hover,
+  button.hover\:bg-pink-700:hover,
+  a.hover\:bg-pink-700:hover {
+    background-color: #BE185D !important;
+  }
+
+  /* Estilos para inputs normales */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select {
+    @apply bg-white border border-gray-200 rounded-md py-3 px-4 w-full text-sm text-gray-700;
+    @apply focus:ring-2 focus:ring-pink-300 focus:border-transparent focus:outline-none;
+    @apply placeholder-gray-500;
+    min-height: 48px;
+  }
+
+  /* Estilos específicos para el buscador */
+  .header-search input[type="search"] {
+    @apply bg-white border-0 rounded-md py-3 px-4 w-full text-sm text-gray-700;
+    @apply focus:ring-2 focus:ring-pink-300 focus:outline-none;
+    @apply placeholder-gray-500;
+    min-height: 48px;
+  }
+
+  /* Quitar fondo gris en autocompletado */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+  }
 }
 
 /* Estilos específicos para las categorías */
@@ -19,7 +60,7 @@
 }
 
 .categories-nav a:hover {
-  @apply text-purple-600 dark:text-purple-400;
+  @apply text-pink-600 dark:text-pink-400;
 }
 
 /* Forzar colores específicos */
