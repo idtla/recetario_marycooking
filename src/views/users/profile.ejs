@@ -112,7 +112,7 @@
                   <!-- Nueva contraseña -->
                   <div>
                     <div class="flex items-center justify-between">
-                      <label for="newPassword" class="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
+                      <label for="profileNewPassword" class="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
                       <button 
                         type="button" 
                         @click="showPasswordFields = !showPasswordFields"
@@ -125,7 +125,7 @@
                       <div class="flex items-center space-x-2">
                         <input 
                           :type="showPassword ? 'text' : 'password'" 
-                          id="newPassword" 
+                          id="profileNewPassword" 
                           name="newPassword"
                           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
                         >
@@ -211,11 +211,13 @@
   <div class="border-b border-gray-200 mt-8">
     <nav class="-mb-px flex space-x-8">
       <% if (user.rol === 'Admin') { %>
-        <button onclick="switchTab('users')" class="tab-link py-4 px-1 border-b-2 font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+        <button onclick="switchTab('users', this)" 
+                class="tab-link py-4 px-1 border-b-2 font-medium text-gray-500 hover:text-pink-600 hover:border-pink-600">
           Usuarios
         </button>
       <% } %>
-      <button onclick="switchTab('recipes')" class="tab-link py-4 px-1 border-b-2 font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
+      <button onclick="switchTab('recipes', this)" 
+              class="tab-link py-4 px-1 border-b-2 font-medium text-gray-500 hover:text-pink-600 hover:border-pink-600">
         Mis Recetas
       </button>
     </nav>
@@ -418,8 +420,8 @@
                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
           </div>
           <div>
-            <label for="editPassword" class="block text-sm font-medium text-gray-700">Nueva Contraseña (opcional)</label>
-            <input type="password" id="editPassword" name="password" x-model="password"
+            <label for="editUserPassword" class="block text-sm font-medium text-gray-700">Nueva Contraseña (opcional)</label>
+            <input type="password" id="editUserPassword" name="password" x-model="password"
                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
           </div>
           <div>
@@ -447,9 +449,10 @@
 </div>
 
 <script>
-function switchTab(tabName) {
+function switchTab(tabName, element) {
   // Ocultar todos los contenidos
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+  
   // Desactivar todos los tabs
   document.querySelectorAll('.tab-link').forEach(link => {
     link.classList.remove('border-pink-600', 'text-pink-600');
@@ -458,15 +461,19 @@ function switchTab(tabName) {
   
   // Mostrar el contenido seleccionado
   document.getElementById(`${tabName}Tab`).classList.remove('hidden');
+  
   // Activar el tab seleccionado
-  event.target.classList.add('border-pink-600', 'text-pink-600');
-  event.target.classList.remove('border-transparent', 'text-gray-500');
+  element.classList.remove('border-transparent', 'text-gray-500');
+  element.classList.add('border-pink-600', 'text-pink-600');
 }
 
 // Activar el tab inicial
 document.addEventListener('DOMContentLoaded', () => {
   const activeTab = '<%= user.rol === "Admin" ? "users" : "recipes" %>';
-  switchTab(activeTab);
+  const defaultTab = document.querySelector(`button[onclick="switchTab('${activeTab}', this)"]`);
+  if (defaultTab) {
+    switchTab(activeTab, defaultTab);
+  }
 });
 
 function editProfile() {
@@ -483,20 +490,34 @@ async function submitEditProfile(e) {
   const formData = new FormData(e.target);
   
   try {
-    const response = await fetch('/api/users/profile', {
+    // Primero intentamos con /api/users/profile
+    let response = await fetch('/api/users/profile', {
       method: 'PUT',
-      body: formData // Enviamos FormData directamente para manejar la imagen
+      body: formData
     });
 
-    if (response.ok) {
-      window.location.reload();
-    } else {
-      const error = await response.json();
-      alert(error.message || 'Error al actualizar el perfil');
+    // Si falla, intentamos con /users/profile
+    if (response.status === 404) {
+      response = await fetch('/users/profile', {
+        method: 'PUT',
+        body: formData
+      });
     }
+
+    if (!response.ok) {
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.indexOf("application/json") !== -1) {
+        const error = await response.json();
+        throw new Error(error.message || 'Error al actualizar el perfil');
+      } else {
+        throw new Error('Error al actualizar el perfil');
+      }
+    }
+
+    window.location.reload();
   } catch (error) {
-    alert('Error al actualizar el perfil');
     console.error('Error:', error);
+    alert(error.message || 'Error al actualizar el perfil');
   }
 }
 
