@@ -17,7 +17,7 @@
       </div>
 
       <!-- Información del usuario separada -->
-      <div class="text-left">
+      <div class="text-left" x-data="{ editProfileModal: false, nombre: '<%= user.nombre %>', email: '<%= user.email %>' }">
         <h1 class="text-xl font-bold text-gray-900 mb-2"><%= user.nombre %></h1>
         <p class="text-gray-600 text-sm mb-2"><%= user.email %></p>
         <div class="mb-2">
@@ -37,9 +37,50 @@
             <%= user.estado %>
           </span>
         </div>
-        <button style="width: 100%; padding: 0.5rem 1rem; background-color: #EC4899; color: white; border-radius: 0.375rem; border: none;">
+        <button 
+          @click="editProfileModal = true"
+          class="w-full px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">
           Editar Perfil
         </button>
+
+        <!-- Modal Editar Perfil -->
+        <div x-show="editProfileModal"
+             style="display: none"
+             class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+          <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+               @click.away="editProfileModal = false">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Editar Perfil</h3>
+            <form @submit.prevent="submitEditProfile($event)">
+              <div class="space-y-4">
+                <div>
+                  <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
+                  <input type="text" id="nombre" name="nombre" x-model="nombre" required
+                         class="mt-1 block w-full">
+                </div>
+                <div>
+                  <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                  <input type="email" id="email" name="email" x-model="email" required
+                         class="mt-1 block w-full">
+                </div>
+                <div>
+                  <label for="password" class="block text-sm font-medium text-gray-700">Nueva Contraseña (opcional)</label>
+                  <input type="password" id="password" name="password"
+                         class="mt-1 block w-full">
+                </div>
+              </div>
+              <div class="mt-6 flex justify-end space-x-3">
+                <button type="button" @click="editProfileModal = false"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-150">
+                  Cancelar
+                </button>
+                <button type="submit"
+                        class="px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">
+                  Guardar Cambios
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -107,14 +148,60 @@
     <% if (user.rol === 'Admin') { %>
       <div id="usersTab" class="tab-content">
         <!-- Header con título y botón -->
-        <div class="flex justify-between items-center mb-6">
+        <div class="flex justify-between items-center mb-6" x-data="{ newUserModal: false, nombre: '', email: '', password: '', rol: 'Usuario' }">
           <h2 class="text-xl font-semibold text-gray-800">Gestión de Usuarios</h2>
           <button 
-            onclick="openNewUserModal()" 
-            style="padding: 0.5rem 1rem; background-color: #EC4899; color: white; border-radius: 0.375rem; border: none;"
-          >
+            @click="newUserModal = true"
+            class="px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">
             Nuevo Usuario
           </button>
+
+          <!-- Modal Nuevo Usuario -->
+          <div x-show="newUserModal"
+               style="display: none"
+               class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+                 @click.away="newUserModal = false">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Crear Nuevo Usuario</h3>
+              <form @submit.prevent="submitNewUser($event)">
+                <div class="space-y-4">
+                  <div>
+                    <label for="newNombre" class="block text-sm font-medium text-gray-700">Nombre</label>
+                    <input type="text" id="newNombre" name="nombre" x-model="nombre" required
+                           class="mt-1 block w-full">
+                  </div>
+                  <div>
+                    <label for="newEmail" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="newEmail" name="email" x-model="email" required
+                           class="mt-1 block w-full">
+                  </div>
+                  <div>
+                    <label for="newPassword" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                    <input type="password" id="newPassword" name="password" x-model="password" required
+                           class="mt-1 block w-full">
+                  </div>
+                  <div>
+                    <label for="newRol" class="block text-sm font-medium text-gray-700">Rol</label>
+                    <select id="newRol" name="rol" x-model="rol" required
+                            class="mt-1 block w-full">
+                      <option value="Usuario">Usuario</option>
+                      <option value="Admin">Administrador</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-3">
+                  <button type="button" @click="newUserModal = false"
+                          class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-150">
+                    Cancelar
+                  </button>
+                  <button type="submit"
+                          class="px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">
+                    Crear Usuario
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
         
         <!-- Tabla de usuarios -->
@@ -158,7 +245,7 @@
                       <div class="flex items-center space-x-2">
                         <button 
                           onclick="editUser('<%= usuario.id %>')"
-                          class="flex items-center justify-center p-2 text-sm font-medium leading-5 text-pink-600 rounded-lg hover:bg-pink-100 focus:outline-none focus:shadow-outline-gray"
+                          class="flex items-center justify-center p-2 text-sm font-medium leading-5 text-pink-600 rounded-lg hover:bg-pink-50 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-colors duration-150"
                           aria-label="Editar"
                         >
                           <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
@@ -167,7 +254,7 @@
                         </button>
                         <button
                           onclick="deleteUser('<%= usuario.id %>')"
-                          class="flex items-center justify-center p-2 text-sm font-medium leading-5 text-red-600 rounded-lg hover:bg-red-100 focus:outline-none focus:shadow-outline-gray"
+                          class="flex items-center justify-center p-2 text-sm font-medium leading-5 text-pink-600 rounded-lg hover:bg-pink-50 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 transition-colors duration-150"
                           aria-label="Eliminar"
                         >
                           <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20">
@@ -212,11 +299,11 @@
               <h3 class="font-semibold mb-2"><%= recipe.titulo %></h3>
               <div class="flex justify-end space-x-2">
                 <a href="/recipes/<%= recipe.Category ? recipe.Category.slug : 'uncategorized' %>/<%= recipe.slug %>" 
-                   class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700">Ver</a>
+                   class="px-3 py-1.5 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">Ver</a>
                 <a href="/recipes/<%= recipe.Category ? recipe.Category.slug : 'uncategorized' %>/<%= recipe.slug %>/edit" 
-                   class="px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700">Editar</a>
+                   class="px-3 py-1.5 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">Editar</a>
                 <button onclick="deleteRecipe('<%= recipe.id %>')" 
-                        class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">Eliminar</button>
+                        class="px-3 py-1.5 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">Eliminar</button>
               </div>
             </div>
           </div>
@@ -232,14 +319,14 @@ function switchTab(tabName) {
   document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
   // Desactivar todos los tabs
   document.querySelectorAll('.tab-link').forEach(link => {
-    link.classList.remove('border-purple-600', 'text-purple-600');
+    link.classList.remove('border-pink-600', 'text-pink-600');
     link.classList.add('border-transparent', 'text-gray-500');
   });
   
   // Mostrar el contenido seleccionado
   document.getElementById(`${tabName}Tab`).classList.remove('hidden');
   // Activar el tab seleccionado
-  event.target.classList.add('border-purple-600', 'text-purple-600');
+  event.target.classList.add('border-pink-600', 'text-pink-600');
   event.target.classList.remove('border-transparent', 'text-gray-500');
 }
 
@@ -248,6 +335,112 @@ document.addEventListener('DOMContentLoaded', () => {
   const activeTab = '<%= user.rol === "Admin" ? "users" : "recipes" %>';
   switchTab(activeTab);
 });
+
+function editProfile() {
+  window.dispatchEvent(new CustomEvent('edit-profile'));
+}
+
+function openNewUserModal() {
+  window.dispatchEvent(new CustomEvent('new-user'));
+}
+
+// Función para editar perfil
+async function submitEditProfile(e) {
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData.entries());
+  
+  try {
+    const response = await fetch('/api/users/profile', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (response.ok) {
+      window.location.reload();
+    } else {
+      const error = await response.json();
+      alert(error.message || 'Error al actualizar el perfil');
+    }
+  } catch (error) {
+    alert('Error al actualizar el perfil');
+    console.error('Error:', error);
+  }
+}
+
+// Función para crear nuevo usuario (solo admin)
+async function submitNewUser(e) {
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData.entries());
+  
+  try {
+    const response = await fetch('/api/users', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (response.ok) {
+      window.location.reload();
+    } else {
+      const error = await response.json();
+      alert(error.message || 'Error al crear el usuario');
+    }
+  } catch (error) {
+    alert('Error al crear el usuario');
+    console.error('Error:', error);
+  }
+}
+
+// Función para eliminar usuario (solo admin)
+async function deleteUser(userId) {
+  if (!confirm('¿Estás seguro de que quieres eliminar este usuario?')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/users/${userId}`, {
+      method: 'DELETE'
+    });
+
+    if (response.ok) {
+      window.location.reload();
+    } else {
+      const error = await response.json();
+      alert(error.message || 'Error al eliminar el usuario');
+    }
+  } catch (error) {
+    alert('Error al eliminar el usuario');
+    console.error('Error:', error);
+  }
+}
+
+// Función para eliminar receta
+async function deleteRecipe(recipeId) {
+  if (!confirm('¿Estás seguro de que quieres eliminar esta receta?')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/recipes/${recipeId}`, {
+      method: 'DELETE'
+    });
+
+    if (response.ok) {
+      window.location.reload();
+    } else {
+      const error = await response.json();
+      alert(error.message || 'Error al eliminar la receta');
+    }
+  } catch (error) {
+    alert('Error al eliminar la receta');
+    console.error('Error:', error);
+  }
+}
 </script>
 
 <%- include('../partials/footer') %>

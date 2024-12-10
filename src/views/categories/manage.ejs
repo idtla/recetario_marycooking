@@ -1,13 +1,13 @@
 <%- include('../partials/header') %>
 
-<div class="container px-6 mx-auto">
+<div class="container px-6 mx-auto" x-data="{ isCreateModalOpen: false, isEditModalOpen: false, editCategoryId: null, editCategoryName: '', editCategoryParentId: null, editCategoryHasChildren: false }">
   <h2 class="my-6 text-2xl font-semibold text-gray-700">
     Gestión de Categorías
   </h2>
 
   <!-- Botón Nueva Categoría -->
   <div class="mb-8">
-    <button @click="window.location.href='/categories/create'" 
+    <button @click="isCreateModalOpen = true" 
             class="px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-700">
       + Nueva Categoría
     </button>
@@ -24,9 +24,10 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y">
-          <% categories.forEach((category, index) => { %>
+          <% let rowIndex = 0; %>
+          <% categories.forEach((category) => { %>
             <!-- Categoría principal -->
-            <tr class="<%= index % 2 === 0 ? 'bg-white' : 'bg-gray-50' %>">
+            <tr class="<%= rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50' %>">
               <td class="px-6 py-3">
                 <div class="flex items-center text-sm">
                   <p class="font-bold text-gray-800">
@@ -36,12 +37,17 @@
               </td>
               <td class="px-6 py-3">
                 <div class="flex items-center justify-end space-x-4 text-sm pr-8">
-                  <a href="/categories/edit/<%= category.id %>" 
-                     class="text-pink-600 hover:text-pink-800"
-                     title="Editar">
+                  <button @click="
+                    isEditModalOpen = true; 
+                    editCategoryId = '<%= category.id %>'; 
+                    editCategoryName = '<%= category.name %>'; 
+                    editCategoryParentId = '<%= category.parentId || '' %>'; 
+                    editCategoryHasChildren = <%= (category.children && category.children.length > 0) ? 'true' : 'false' %>"
+                    class="text-pink-600 hover:text-pink-800"
+                    title="Editar">
                     <i class="fas fa-edit"></i>
-                  </a>
-                  <button onclick="deleteCategory('<%= category.id %>')"
+                  </button>
+                  <button @click="deleteCategory('<%= category.id %>')"
                           class="text-red-600 hover:text-red-800"
                           title="Eliminar">
                     <i class="fas fa-trash"></i>
@@ -49,10 +55,11 @@
                 </div>
               </td>
             </tr>
+            <% rowIndex++; %>
             <!-- Subcategorías -->
             <% if (category.children && category.children.length > 0) { %>
               <% category.children.forEach(subcategory => { %>
-                <tr class="<%= index % 2 === 0 ? 'bg-white' : 'bg-gray-50' %>">
+                <tr class="<%= rowIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50' %>">
                   <td class="px-6 py-2">
                     <div class="flex items-center text-sm">
                       <div class="pl-8 flex items-center">
@@ -65,12 +72,17 @@
                   </td>
                   <td class="px-6 py-2">
                     <div class="flex items-center justify-end space-x-4 text-sm pr-8">
-                      <a href="/categories/edit/<%= subcategory.id %>" 
-                         class="text-pink-600 hover:text-pink-800"
-                         title="Editar">
+                      <button @click="
+                        isEditModalOpen = true; 
+                        editCategoryId = '<%= subcategory.id %>'; 
+                        editCategoryName = '<%= subcategory.name %>'; 
+                        editCategoryParentId = '<%= subcategory.parentId %>'; 
+                        editCategoryHasChildren = false"
+                        class="text-pink-600 hover:text-pink-800"
+                        title="Editar">
                         <i class="fas fa-edit"></i>
-                      </a>
-                      <button onclick="deleteCategory('<%= subcategory.id %>')"
+                      </button>
+                      <button @click="deleteCategory('<%= subcategory.id %>')"
                               class="text-red-600 hover:text-red-800"
                               title="Eliminar">
                         <i class="fas fa-trash"></i>
@@ -78,11 +90,151 @@
                     </div>
                   </td>
                 </tr>
+                <% rowIndex++; %>
               <% }) %>
             <% } %>
           <% }) %>
         </tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- Modal Nueva Categoría -->
+  <div x-show="isCreateModalOpen"
+       class="fixed inset-0 z-30 flex items-end bg-black bg-opacity-50 sm:items-center sm:justify-center"
+       x-transition:enter="transition ease-out duration-150"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0">
+    <div class="w-full px-6 py-4 overflow-hidden bg-white rounded-t-lg dark:bg-gray-800 sm:rounded-lg sm:m-4 sm:max-w-xl"
+         x-show="isCreateModalOpen"
+         @click.away="isCreateModalOpen = false"
+         x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0 transform translate-y-1/2"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0 transform translate-y-1/2">
+      <header class="flex justify-between">
+        <h3 class="text-lg font-semibold text-gray-700">Nueva Categoría</h3>
+        <button @click="isCreateModalOpen = false" class="text-gray-400 hover:text-gray-500">
+          <i class="fas fa-times"></i>
+        </button>
+      </header>
+      <form action="/categories/create" method="POST" class="mt-4">
+        <div class="mb-4">
+          <label class="block text-sm">
+            <span class="text-gray-700">Nombre</span>
+            <input type="text" 
+                   name="name"
+                   class="block w-full mt-1 text-sm border-gray-300 rounded-md focus:border-pink-400 focus:outline-none focus:shadow-outline-pink"
+                   required>
+          </label>
+        </div>
+        <div class="mb-4">
+          <label class="block text-sm">
+            <span class="text-gray-700">Categoría Padre (opcional)</span>
+            <select name="parentId"
+                    class="block w-full mt-1 text-sm border-gray-300 rounded-md focus:border-pink-400 focus:outline-none focus:shadow-outline-pink">
+              <option value="">Ninguna (Categoría Principal)</option>
+              <% categories.forEach(category => { %>
+                <% if (!category.parentId) { %>
+                  <option value="<%= category.id %>"><%= category.name %></option>
+                <% } %>
+              <% }); %>
+            </select>
+          </label>
+        </div>
+        <footer class="flex justify-end space-x-2">
+          <button type="button" 
+                  @click="isCreateModalOpen = false"
+                  class="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100">
+            Cancelar
+          </button>
+          <button type="submit"
+                  class="px-4 py-2 text-sm font-medium text-white bg-pink-600 rounded-lg hover:bg-pink-700">
+            Crear
+          </button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Editar Categoría -->
+  <div x-show="isEditModalOpen"
+       class="fixed inset-0 z-30 flex items-end bg-black bg-opacity-50 sm:items-center sm:justify-center"
+       x-transition:enter="transition ease-out duration-150"
+       x-transition:enter-start="opacity-0"
+       x-transition:enter-end="opacity-100"
+       x-transition:leave="transition ease-in duration-150"
+       x-transition:leave-start="opacity-100"
+       x-transition:leave-end="opacity-0">
+    <div class="w-full px-6 py-4 overflow-hidden bg-white rounded-t-lg dark:bg-gray-800 sm:rounded-lg sm:m-4 sm:max-w-xl"
+         x-show="isEditModalOpen"
+         @click.away="isEditModalOpen = false"
+         x-transition:enter="transition ease-out duration-150"
+         x-transition:enter-start="opacity-0 transform translate-y-1/2"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0 transform translate-y-1/2">
+      <header class="flex justify-between">
+        <h3 class="text-lg font-semibold text-gray-700">Editar Categoría</h3>
+        <button @click="isEditModalOpen = false" class="text-gray-400 hover:text-gray-500">
+          <i class="fas fa-times"></i>
+        </button>
+      </header>
+      <form x-bind:action="'/categories/edit/' + editCategoryId" 
+            method="POST" 
+            class="mt-4"
+            onsubmit="handleEditSubmit(event)">
+        <input type="hidden" name="_method" value="PUT">
+        <div class="mb-4">
+          <label class="block text-sm">
+            <span class="text-gray-700">Nombre</span>
+            <input type="text" 
+                   name="name"
+                   x-model="editCategoryName"
+                   class="block w-full mt-1 text-sm border-gray-300 rounded-md focus:border-pink-400 focus:outline-none focus:shadow-outline-pink"
+                   required>
+          </label>
+        </div>
+        <div class="mb-4" x-show="!editCategoryHasChildren">
+          <label class="block text-sm">
+            <span class="text-gray-700">Categoría Padre (opcional)</span>
+            <select name="parentId"
+                    x-model="editCategoryParentId"
+                    class="block w-full mt-1 text-sm border-gray-300 rounded-md focus:border-pink-400 focus:outline-none focus:shadow-outline-pink">
+              <option value="">Ninguna (Categoría Principal)</option>
+              <% categories.forEach(category => { %>
+                <% if (!category.parentId) { %>
+                  <option value="<%= category.id %>"><%= category.name %></option>
+                <% } %>
+              <% }); %>
+            </select>
+          </label>
+        </div>
+        <div class="mb-4" x-show="editCategoryHasChildren">
+          <p class="text-sm text-gray-600">
+            <i class="fas fa-info-circle mr-1"></i>
+            Esta categoría tiene subcategorías y no puede ser convertida en subcategoría.
+          </p>
+          <input type="hidden" name="parentId" x-model="editCategoryParentId">
+        </div>
+        <footer class="flex justify-end space-x-2">
+          <button type="button" 
+                  @click="isEditModalOpen = false"
+                  class="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100">
+            Cancelar
+          </button>
+          <button type="submit"
+                  class="px-4 py-2 text-sm font-medium text-white bg-pink-600 rounded-lg hover:bg-pink-700">
+            Guardar
+          </button>
+        </footer>
+      </form>
     </div>
   </div>
 </div>
@@ -108,5 +260,39 @@ function deleteCategory(categoryId) {
       alert('Error al eliminar la categoría');
     });
   }
+}
+
+function handleEditSubmit(event) {
+  event.preventDefault();
+  const form = event.target;
+  const formData = new FormData(form);
+  const categoryId = form.action.split('/').pop();
+
+  fetch(`/categories/update/${categoryId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      name: formData.get('name'),
+      parentId: formData.get('parentId')
+    })
+  })
+  .then(response => {
+    if (response.ok) {
+      window.location.reload();
+    } else {
+      return response.json().then(data => {
+        throw new Error(data.error || 'Error al actualizar la categoría');
+      });
+    }
+  })
+  .then(() => {
+    window.location.reload();
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert(error.message || 'Error al actualizar la categoría');
+  });
 }
 </script> 

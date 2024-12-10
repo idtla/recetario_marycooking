@@ -300,10 +300,15 @@ exports.getUncategorizedRecipes = async (req, res) => {
             }
         });
 
-        // Usamos la vista home pero sin categorías en el sidebar
+        const categories = await Category.findAll({
+            order: [['name', 'ASC']]
+        });
+
+        // Usamos la vista home pero marcando que estamos en "sin categoría"
         res.render('home', { 
             recipes,
-            categories: [], // Enviamos un array vacío para que no muestre categorías
+            categories,
+            currentCategory: null, // Explícitamente marcamos que no hay categoría seleccionada
             title: 'Recetas sin categoría'
         });
 

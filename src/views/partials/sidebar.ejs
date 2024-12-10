@@ -1,4 +1,4 @@
-<div class="py-4 text-gray-500 dark:text-gray-400">
+<div class="py-4">
   <div class="px-6">
     <h2 class="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-6">
       Categorías
@@ -21,17 +21,17 @@
           <li>
             <!-- Categoría principal -->
             <a href="/categories/<%= mainCategory.slug %>" 
-               class="block text-lg font-semibold <%= locals.currentCategory && locals.currentCategory.id === mainCategory.id ? 'text-purple-600 dark:text-purple-400' : 'text-gray-800 hover:text-purple-600 dark:text-gray-200 dark:hover:text-purple-400' %>">
+               class="<%= locals.currentCategory && locals.currentCategory.id === mainCategory.id ? 'active' : '' %>">
               <%= mainCategory.name %>
             </a>
             
             <% if (children.length > 0) { %>
               <!-- Subcategorías -->
-              <ul class="mt-2 ml-6 space-y-2">
+              <ul>
                 <% children.forEach(function(child) { %>
                   <li>
                     <a href="/categories/<%= child.slug %>" 
-                       class="block <%= locals.currentCategory && locals.currentCategory.id === child.id ? 'text-purple-600 dark:text-purple-400' : 'text-gray-600 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-400' %>">
+                       class="<%= locals.currentCategory && locals.currentCategory.id === child.id ? 'active' : '' %>">
                       <%= child.name %>
                     </a>
                   </li>
@@ -40,17 +40,16 @@
             <% } %>
           </li>
         <% }); %>
-        <!-- Sin categoría - añadido al final -->
+        <!-- Sin categoría -->
         <li>
           <a href="/recipes/uncategorized" 
-             class="block mt-8 ml-2 text-sm text-gray-300 hover:text-purple-600 dark:text-gray-500 dark:hover:text-purple-400">
+             class="uncategorized <%= locals.currentCategory === null ? 'active' : '' %>">
             Sin categoría
           </a>
         </li>
         <!-- Botón borrar filtros -->
         <li>
-          <a href="/" 
-             class="flex items-center mt-4 ml-2 text-sm text-gray-300 hover:text-purple-600 dark:text-gray-500 dark:hover:text-purple-400">
+          <a href="/" class="clear-filters">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>

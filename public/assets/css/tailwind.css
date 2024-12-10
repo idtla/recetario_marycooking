@@ -32,59 +32,194 @@
   input[type="number"],
   textarea,
   select {
-    @apply bg-white border border-gray-200 rounded-md py-3 px-4 w-full text-sm text-gray-700;
-    @apply focus:ring-2 focus:ring-pink-300 focus:border-transparent focus:outline-none;
+    @apply bg-gray-50 border border-gray-300 rounded-md py-2 px-4 w-full text-sm text-gray-700;
+    @apply focus:border-pink-400 focus:outline-none focus:shadow-outline-pink focus:bg-white;
     @apply placeholder-gray-500;
-    min-height: 48px;
+    min-height: 42px;
   }
 
   /* Estilos específicos para el buscador */
   .header-search input[type="search"] {
-    @apply bg-white border-0 rounded-md py-3 px-4 w-full text-sm text-gray-700;
-    @apply focus:ring-2 focus:ring-pink-300 focus:outline-none;
+    @apply bg-white border-0 rounded-md py-2 px-4 w-full text-sm text-gray-700;
+    @apply focus:border-pink-400 focus:outline-none focus:shadow-outline-pink;
     @apply placeholder-gray-500;
-    min-height: 48px;
+    min-height: 42px;
   }
 
   /* Quitar fondo gris en autocompletado */
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
-    -webkit-box-shadow: 0 0 0px 1000px white inset !important;
+    -webkit-box-shadow: 0 0 0px 1000px #F9FAFB inset !important;
   }
 }
 
-/* Estilos específicos para las categorías */
-.categories-nav a {
-  @apply transition-colors duration-150;
+/* Estilos específicos para el sidebar */
+.categories-nav {
+  color: #6B7280;
 }
 
-.categories-nav a:hover {
-  @apply text-pink-600 dark:text-pink-400;
+.dark .categories-nav {
+  color: #9CA3AF;
+}
+
+.categories-nav a {
+  transition: color 150ms;
+}
+
+/* Categorías principales */
+.categories-nav > ul > li > a {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1F2937;
+}
+
+.dark .categories-nav > ul > li > a {
+  color: #E5E7EB;
+}
+
+.categories-nav > ul > li > a:hover {
+  color: #EC4899;
+}
+
+.dark .categories-nav > ul > li > a:hover {
+  color: #F472B6;
+}
+
+.categories-nav > ul > li > a.active {
+  color: #EC4899 !important;
+  font-weight: 700;
+}
+
+.dark .categories-nav > ul > li > a.active {
+  color: #F472B6 !important;
+  font-weight: 700;
+}
+
+/* Subcategorías */
+.categories-nav ul li ul {
+  margin-top: 0.5rem;
+  margin-left: 1.5rem;
+  border-left: 2px solid #e2e8f0;
+  padding-left: 1rem;
+}
+
+.dark .categories-nav ul li ul {
+  border-left-color: #4a5568;
+}
+
+.categories-nav ul li ul li {
+  margin-top: 0.5rem;
+}
+
+.categories-nav ul li ul li a {
+  display: block;
+  color: #4B5563;
+}
+
+.dark .categories-nav ul li ul li a {
+  color: #9CA3AF;
+}
+
+.categories-nav ul li ul li a:hover {
+  color: #EC4899;
+}
+
+.dark .categories-nav ul li ul li a:hover {
+  color: #F472B6;
+}
+
+.categories-nav ul li ul li a.active {
+  color: #EC4899 !important;
+  font-weight: 600;
+}
+
+.dark .categories-nav ul li ul li a.active {
+  color: #F472B6 !important;
+  font-weight: 600;
+}
+
+/* Sin categoría y borrar filtros */
+.categories-nav .uncategorized {
+  display: block;
+  margin-top: 2rem;
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+  color: #9CA3AF;
+}
+
+.dark .categories-nav .uncategorized {
+  color: #6B7280;
+}
+
+.categories-nav .uncategorized:hover,
+.categories-nav .clear-filters:hover {
+  color: #EC4899;
+}
+
+.dark .categories-nav .uncategorized:hover,
+.dark .categories-nav .clear-filters:hover {
+  color: #F472B6;
+}
+
+.categories-nav .uncategorized.active {
+  color: #EC4899 !important;
+  font-weight: 600;
+}
+
+.dark .categories-nav .uncategorized.active {
+  color: #F472B6 !important;
+  font-weight: 600;
+}
+
+.categories-nav .clear-filters {
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+  color: #9CA3AF;
+}
+
+.dark .categories-nav .clear-filters {
+  color: #6B7280;
 }
 
 /* Forzar colores específicos */
 .recipe-card {
-  @apply text-current;
+  color: currentColor;
 }
 
 .recipe-card:hover {
-  @apply text-current;
+  color: currentColor;
 }
 
 .recipe-card:hover * {
-  @apply text-current;
+  color: currentColor;
 }
 
-/* Forzar colores específicos */
 .recipe-card h4,
 .recipe-card h4:hover,
 .recipe-card:hover h4 {
-  @apply text-gray-900 dark:text-gray-100;
+  color: #111827;
+}
+
+.dark .recipe-card h4,
+.dark .recipe-card h4:hover,
+.dark .recipe-card:hover h4 {
+  color: #F9FAFB;
 }
 
 .recipe-card p,
 .recipe-card p:hover,
 .recipe-card:hover p {
-  @apply text-gray-600 dark:text-gray-400;
+  color: #4B5563;
 }
+
+.dark .recipe-card p,
+.dark .recipe-card p:hover,
+.dark .recipe-card:hover p {
+  color: #9CA3AF;
+}
+

@@ -122,7 +122,17 @@ const userController = {
       console.error('Error al eliminar usuario:', error);
       res.status(500).json({ message: 'Error interno del servidor' });
     }
-  }
-};
+  },
 
-module.exports = userController;
+  getProfile: async (req, res) => {
+    try {
+      // Aquí va la lógica para obtener las recetas del usuario
+      const recipes = []; // Obtén las recetas del usuario desde la base de datos
+      res.render('users/profile', { recipes });
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error al cargar el perfil');
+    }
+  }
+};module.exports = userController;
+
