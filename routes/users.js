@@ -4,6 +4,9 @@ const userController = require('../controllers/userController');
 const { isAuthenticated } = require('../middlewares/auth');
 
 // Ruta del perfil
-router.get('/profile', userController.profile);
+router.get('/profile', isAuthenticated, userController.profile);
+
+// Ruta para actualizar el perfil
+router.put('/profile', isAuthenticated, userController.updateProfile);
 
 module.exports = router;

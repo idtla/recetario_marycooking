@@ -62,8 +62,8 @@ app.use('/auth', authRoutes);
 app.use('/', isAuthenticated, homeRoutes);
 app.use('/recipes', isAuthenticated, recipeRoutes);
 app.use('/categories', isAuthenticated, categoryRoutes);
-app.use('/api', apiRouter);
-app.use('/users', userRoutes);
+app.use('/api', isAuthenticated, apiRouter);
+app.use('/users', isAuthenticated, userRoutes);
 
 // Manejo de errores
 app.use((err, req, res, next) => {

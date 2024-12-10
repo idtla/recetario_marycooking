@@ -2,6 +2,13 @@ const { Recipe, Category, User } = require('../models');
 
 exports.getHome = async (req, res) => {
     try {
+        let user = null;
+        if (req.session.user) {
+            user = await User.findByPk(req.session.user.id, {
+                attributes: ['id', 'email', 'nombre', 'rol', 'estado', 'imagen_url']
+            });
+        }
+
         const recipes = await Recipe.findAll({
             include: [
                 { 
@@ -28,7 +35,7 @@ exports.getHome = async (req, res) => {
         res.render('home', {
             recipes,
             categories,
-            user: req.session.user,
+            user: user || req.session.user,
             error: null
         });
     } catch (error) {

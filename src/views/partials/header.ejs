@@ -64,8 +64,10 @@
                     class="flex rounded-full focus:outline-none"
                     id="user-menu-button">
               <img class="h-8 w-8 rounded-full object-cover"
-                   src="<%= locals.user && user.avatar ? user.avatar : '/assets/img/default-avatar.webp' %>"
-                   alt="Foto de perfil">
+                   src="<%= user.imagen_url %>"
+                   alt="Avatar de <%= user.nombre %>"
+                   onerror="this.src='/assets/img/default-avatar.webp'"
+              >
             </button>
 
             <!-- Menú desplegable -->

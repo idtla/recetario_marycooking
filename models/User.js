@@ -29,6 +29,11 @@ const User = sequelize.define('usuarios', {
         type: DataTypes.STRING,
         allowNull: false,
         defaultValue: 'Editor'
+    },
+    imagen_url: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+        defaultValue: '/assets/img/default-avatar.webp'
     }
 }, {
     timestamps: false,

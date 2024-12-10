@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS Users (
   nombre VARCHAR(100),
   created_at DATETIME NOT NULL,
   rol ENUM('Admin', 'Editor', 'Usuario') NOT NULL DEFAULT 'Usuario',
-  estado ENUM('Activo', 'Inactivo', 'Pendiente') NOT NULL DEFAULT 'Pendiente'
+  estado ENUM('Activo', 'Inactivo', 'Pendiente') NOT NULL DEFAULT 'Pendiente',
+  imagen_url VARCHAR(255) DEFAULT '/assets/img/default-avatar.webp'
 );
 
 CREATE TABLE IF NOT EXISTS Categories (
