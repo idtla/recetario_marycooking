@@ -1,10 +1,18 @@
-const { Recipe, Category } = require('../models');
+const { Recipe, Category, User } = require('../models');
 const { Op, Sequelize } = require('sequelize');
 
 exports.search = async (req, res) => {
   const query = req.query.q;
   
   try {
+    // Obtener el usuario completo si está en sesión
+    let user = null;
+    if (req.session.user) {
+      user = await User.findByPk(req.session.user.id, {
+        attributes: ['id', 'email', 'nombre', 'rol', 'estado', 'imagen_url']
+      });
+    }
+
     const [recipes, categories] = await Promise.all([
       Recipe.findAll({
         where: {
@@ -25,7 +33,8 @@ exports.search = async (req, res) => {
     res.render('search', {
       recipes,
       categories,
-      searchQuery: query
+      searchQuery: query,
+      user: user || req.session.user
     });
   } catch (error) {
     console.error('Error en búsqueda:', error);

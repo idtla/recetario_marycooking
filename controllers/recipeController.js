@@ -3,15 +3,29 @@ const slugify = require('slugify');
 const path = require('path');
 const fs = require('fs').promises;
 
+// Función auxiliar para obtener el usuario completo
+async function getFullUser(req) {
+    if (req.session.user) {
+        return await User.findByPk(req.session.user.id, {
+            attributes: ['id', 'email', 'nombre', 'rol', 'estado', 'imagen_url']
+        });
+    }
+    return null;
+}
+
 exports.getAllRecipes = async (req, res) => {
     try {
+        const user = await getFullUser(req);
         const recipes = await Recipe.findAll({
             include: [
                 { model: Category, as: 'Category' },
                 { model: User, as: 'User' }
             ]
         });
-        res.render('recipes/index', { recipes });
+        res.render('recipes/index', { 
+            recipes,
+            user: user || req.session.user
+        });
     } catch (error) {
         console.error(error);
         res.status(500).send('Error al cargar las recetas');
@@ -20,19 +34,19 @@ exports.getAllRecipes = async (req, res) => {
 
 exports.getRecipeBySlug = async (req, res) => {
     try {
+        const user = await getFullUser(req);
         let recipe;
         if (req.params.categorySlug === 'uncategorized') {
             recipe = await Recipe.findOne({
                 where: { 
                     slug: req.params.slug,
-                    categoryId: null  // Específicamente buscamos recetas sin categoría
+                    categoryId: null
                 },
                 include: [
                     { model: User, as: 'User' }
                 ]
             });
         } else {
-            // Mantener la búsqueda original para recetas con categoría
             recipe = await Recipe.findOne({
                 include: [
                     {
@@ -47,10 +61,13 @@ exports.getRecipeBySlug = async (req, res) => {
         }
 
         if (!recipe) {
-            return res.redirect('/'); // Redirigir a home en lugar de intentar renderizar 404
+            return res.redirect('/');
         }
 
-        res.render('recipes/show', { recipe });
+        res.render('recipes/show', { 
+            recipe,
+            user: user || req.session.user
+        });
 
     } catch (error) {
         console.error('Error:', error);
@@ -60,6 +77,7 @@ exports.getRecipeBySlug = async (req, res) => {
 
 exports.createForm = async (req, res) => {
     try {
+        const user = await getFullUser(req);
         const categories = await Category.findAll({
             include: [{
                 model: Category,
@@ -69,15 +87,23 @@ exports.createForm = async (req, res) => {
                 parentId: null
             }
         });
-        res.render('recipes/create', { categories, error: null });
+        res.render('recipes/create', { 
+            categories, 
+            error: null,
+            user: user || req.session.user
+        });
     } catch (error) {
         console.error(error);
-        res.status(500).render('error', { error: 'Error al cargar el formulario' });
+        res.status(500).render('error', { 
+            error: 'Error al cargar el formulario',
+            user: req.session.user
+        });
     }
 };
 
 exports.editForm = async (req, res) => {
     try {
+        const user = await getFullUser(req);
         const recipe = await Recipe.findOne({
             where: { slug: req.params.slug },
             include: [{ model: Category, as: 'Category' }]
@@ -87,10 +113,8 @@ exports.editForm = async (req, res) => {
             return res.status(404).send('Receta no encontrada');
         }
 
-        // Convertir a JSON y asegurar que imagenesAdicionales sea un array
         const recipeData = recipe.toJSON();
         
-        // Asegurarse de que imagenesAdicionales sea un array
         if (typeof recipeData.imagenesAdicionales === 'string') {
             try {
                 recipeData.imagenesAdicionales = JSON.parse(recipeData.imagenesAdicionales);
@@ -99,7 +123,6 @@ exports.editForm = async (req, res) => {
             }
         }
         
-        // Si imagenesAdicionales es null o undefined, inicializarlo como array vacío
         if (!Array.isArray(recipeData.imagenesAdicionales)) {
             recipeData.imagenesAdicionales = [];
         }
@@ -112,7 +135,8 @@ exports.editForm = async (req, res) => {
         res.render('recipes/edit', {
             recipe: recipeData,
             categories,
-            error: null
+            error: null,
+            user: user || req.session.user
         });
 
     } catch (error) {

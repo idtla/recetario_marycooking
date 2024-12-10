@@ -1,7 +1,15 @@
-const { Category, Recipe } = require('../models');
+const { Category, Recipe, User } = require('../models');
 
 exports.getBySlug = async (req, res) => {
     try {
+        // Obtener el usuario completo si está en sesión
+        let user = null;
+        if (req.session.user) {
+            user = await User.findByPk(req.session.user.id, {
+                attributes: ['id', 'email', 'nombre', 'rol', 'estado', 'imagen_url']
+            });
+        }
+
         const category = await Category.findOne({
             where: { slug: req.params.slug }
         });
@@ -30,7 +38,8 @@ exports.getBySlug = async (req, res) => {
         res.render('home', {
             recipes,
             categories,
-            currentCategory: category
+            currentCategory: category,
+            user: user || req.session.user
         });
         
     } catch (error) {
@@ -41,6 +50,14 @@ exports.getBySlug = async (req, res) => {
 
 exports.manageCategories = async (req, res) => {
     try {
+        // Obtener el usuario completo si está en sesión
+        let user = null;
+        if (req.session.user) {
+            user = await User.findByPk(req.session.user.id, {
+                attributes: ['id', 'email', 'nombre', 'rol', 'estado', 'imagen_url']
+            });
+        }
+
         const mainCategories = await Category.findAll({
             where: {
                 parentId: null
@@ -58,12 +75,14 @@ exports.manageCategories = async (req, res) => {
         
         res.render('categories/manage', { 
             categories: mainCategories,
-            error: null 
+            error: null,
+            user: user || req.session.user
         });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).render('error', { 
-            message: 'Error al cargar las categorías'
+            message: 'Error al cargar las categorías',
+            user: req.session.user
         });
     }
 };
