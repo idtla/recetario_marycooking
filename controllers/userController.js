@@ -199,6 +199,40 @@ const userController = {
       console.error('Error al actualizar perfil:', error);
       res.status(500).json({ message: 'Error al actualizar el perfil' });
     }
+  },
+
+  preRegisterUser: async (req, res) => {
+    try {
+      console.log('Iniciando pre-registro de usuario');
+      console.log('Datos recibidos:', req.body);
+      
+      const { email, rol } = req.body;
+
+      if (!email || !rol) {
+        return res.status(400).json({ message: 'Email y rol son requeridos' });
+      }
+
+      // Verificar si el email ya existe
+      const existingUser = await User.findOne({ where: { email } });
+      if (existingUser) {
+        return res.status(400).json({ message: 'El email ya está registrado' });
+      }
+
+      // Crear usuario en estado pendiente
+      const user = await User.create({
+        email,
+        rol,
+        estado: 'Pendiente',
+        // Establecer una contraseña temporal que será cambiada en el registro
+        password: await bcrypt.hash(Math.random().toString(36), 10)
+      });
+
+      console.log('Usuario pre-registrado exitosamente:', user.id);
+      res.status(201).json({ message: 'Usuario pre-registrado correctamente' });
+    } catch (error) {
+      console.error('Error al pre-registrar usuario:', error);
+      res.status(500).json({ message: 'Error al pre-registrar usuario' });
+    }
   }
 };
 

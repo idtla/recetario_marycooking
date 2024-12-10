@@ -23,23 +23,45 @@ const authController = {
 
   register: async (req, res) => {
     try {
-      const { email, password, nombre } = req.body;
+      const { nombre, email, password } = req.body;
 
-      // Hash de la contraseña
+      // Buscar usuario pre-registrado
+      const existingUser = await User.findOne({ where: { email } });
+
+      if (!existingUser) {
+        return res.render('auth/register', { 
+          error: 'Este email no está autorizado para registrarse. Contacta con un administrador.' 
+        });
+      }
+
+      if (existingUser.estado !== 'Pendiente') {
+        return res.render('auth/register', { 
+          error: 'Este email ya está registrado' 
+        });
+      }
+
+      // Actualizar el usuario pre-registrado
       const hashedPassword = await bcrypt.hash(password, 10);
-
-      // Crear usuario
-      const user = await User.create({
-        email,
+      await existingUser.update({
+        nombre,
         password: hashedPassword,
-        nombre
+        estado: 'Activo'
       });
 
-      res.redirect('/auth/login');
+      // Iniciar sesión
+      req.session.user = {
+        id: existingUser.id,
+        email: existingUser.email,
+        nombre: existingUser.nombre,
+        rol: existingUser.rol,
+        estado: existingUser.estado,
+        imagen_url: existingUser.imagen_url
+      };
 
+      res.redirect('/');
     } catch (error) {
       console.error('Error en registro:', error);
-      res.render('pages/register', {
+      res.render('auth/register', {
         error: 'Error al crear la cuenta'
       });
     }
@@ -75,7 +97,10 @@ const authController = {
       req.session.user = {
         id: user.id,
         email: user.email,
-        nombre: user.nombre
+        nombre: user.nombre,
+        rol: user.rol,
+        estado: user.estado,
+        imagen_url: user.imagen_url
       };
 
       // Asegurarnos de que la sesión se guarde antes de responder

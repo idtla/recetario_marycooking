@@ -31,7 +31,10 @@ router.post('/login', async (req, res) => {
         req.session.user = {
             id: user.id,
             email: user.email,
-            nombre: user.nombre
+            nombre: user.nombre,
+            rol: user.rol,
+            estado: user.estado,
+            imagen_url: user.imagen_url
         };
 
         res.redirect('/');
@@ -44,30 +47,46 @@ router.post('/login', async (req, res) => {
 router.post('/register', async (req, res) => {
     try {
         const { nombre, email, password } = req.body;
+
+        // Verificar si el email está pre-registrado
         const existingUser = await User.findOne({ where: { email } });
 
-        if (existingUser) {
-            return res.render('auth/register', { error: 'El email ya está registrado' });
+        if (!existingUser) {
+            return res.render('auth/register', { 
+                error: 'Este correo no está autorizado para registrarse. Contacta con un administrador.' 
+            });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        if (existingUser.estado !== 'Pendiente') {
+            return res.render('auth/register', { 
+                error: 'Este correo ya está registrado' 
+            });
+        }
 
-        const user = await User.create({
+        // Actualizar el usuario pre-registrado
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await existingUser.update({
             nombre,
-            email,
             password: hashedPassword,
-            created_at: new Date()
+            estado: 'Activo'
         });
 
+        // Iniciar sesión
         req.session.user = {
-            id: user.id,
-            email: user.email,
-            nombre: user.nombre
+            id: existingUser.id,
+            email: existingUser.email,
+            nombre: existingUser.nombre,
+            rol: existingUser.rol,
+            estado: 'Activo',
+            imagen_url: existingUser.imagen_url
         };
 
         res.redirect('/');
     } catch (error) {
-        res.render('auth/register', { error: 'Error al crear la cuenta' });
+        console.error('Error en registro:', error);
+        res.render('auth/register', {
+            error: 'Error al crear la cuenta'
+        });
     }
 });
 

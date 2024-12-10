@@ -9,4 +9,7 @@ router.get('/profile', isAuthenticated, userController.profile);
 // Ruta para actualizar el perfil
 router.put('/profile', isAuthenticated, userController.updateProfile);
 
+// Ruta para pre-registrar usuarios (solo admin)
+router.post('/pre-register', isAuthenticated, userController.preRegisterUser);
+
 module.exports = router;
