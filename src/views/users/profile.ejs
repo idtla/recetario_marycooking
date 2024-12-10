@@ -17,7 +17,7 @@
       </div>
 
       <!-- Información del usuario separada -->
-      <div class="text-left" x-data="{ editProfileModal: false, nombre: '<%= user.nombre %>', email: '<%= user.email %>' }">
+      <div class="text-left">
         <h1 class="text-xl font-bold text-gray-900 mb-2"><%= user.nombre %></h1>
         <p class="text-gray-600 text-sm mb-2"><%= user.email %></p>
         <div class="mb-2">
@@ -37,48 +37,127 @@
             <%= user.estado %>
           </span>
         </div>
-        <button 
-          @click="editProfileModal = true"
-          class="w-full px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">
-          Editar Perfil
-        </button>
+        <div x-data="{ open: false, nombre: '<%= user.nombre %>', email: '<%= user.email %>', showPassword: false, showPasswordFields: false }">
+          <button 
+            @click="open = true"
+            class="w-full px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">
+            Editar Perfil
+          </button>
 
-        <!-- Modal Editar Perfil -->
-        <div x-show="editProfileModal"
-             style="display: none"
-             class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-          <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4"
-               @click.away="editProfileModal = false">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Editar Perfil</h3>
-            <form @submit.prevent="submitEditProfile($event)">
-              <div class="space-y-4">
-                <div>
-                  <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
-                  <input type="text" id="nombre" name="nombre" x-model="nombre" required
-                         class="mt-1 block w-full">
+          <!-- Modal -->
+          <div x-show="open"
+               style="display: none"
+               class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+                 @click.away="open = false">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">Editar Perfil</h3>
+              <form @submit.prevent="submitEditProfile($event)" enctype="multipart/form-data">
+                <div class="space-y-4">
+                  <!-- Imagen de perfil -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700">Imagen de perfil</label>
+                    <div class="mt-1 flex items-center space-x-4">
+                      <div class="w-20 h-20 rounded-full overflow-hidden bg-gray-100">
+                        <img 
+                          id="preview-image"
+                          src="/assets/img/default-avatar.webp" 
+                          alt="Vista previa"
+                          class="w-full h-full object-cover"
+                          onerror="this.src='/assets/img/default-avatar.webp'"
+                        >
+                      </div>
+                      <div class="flex flex-col space-y-2">
+                        <label class="cursor-pointer inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                          <input 
+                            type="file" 
+                            name="imagen" 
+                            accept="image/*"
+                            class="hidden"
+                            @change="previewImage($event)"
+                          >
+                          Cambiar imagen
+                        </label>
+                        <button 
+                          type="button"
+                          @click="removeImage()"
+                          class="inline-flex items-center px-3 py-2 text-sm font-medium text-red-600 hover:text-red-700">
+                          Eliminar imagen
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre</label>
+                    <input type="text" id="nombre" name="nombre" x-model="nombre" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                  </div>
+                  <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email" name="email" x-model="email" required
+                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                  </div>
+
+                  <!-- Contraseña actual -->
+                  <div x-show="showPasswordFields">
+                    <label for="currentPassword" class="block text-sm font-medium text-gray-700">Contraseña Actual</label>
+                    <input 
+                      type="password"
+                      id="currentPassword" 
+                      name="currentPassword"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                    >
+                  </div>
+
+                  <!-- Nueva contraseña -->
+                  <div>
+                    <div class="flex items-center justify-between">
+                      <label for="newPassword" class="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
+                      <button 
+                        type="button" 
+                        @click="showPasswordFields = !showPasswordFields"
+                        class="text-sm text-pink-600 hover:text-pink-700"
+                        x-text="showPasswordFields ? 'Cancelar cambio' : 'Cambiar contraseña'"
+                      >
+                      </button>
+                    </div>
+                    <div x-show="showPasswordFields" class="mt-1">
+                      <div class="flex items-center space-x-2">
+                        <input 
+                          :type="showPassword ? 'text' : 'password'" 
+                          id="newPassword" 
+                          name="newPassword"
+                          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-pink-500 focus:ring-pink-500"
+                        >
+                        <button 
+                          type="button"
+                          @click="showPassword = !showPassword"
+                          class="text-gray-400 hover:text-gray-500 focus:outline-none p-2"
+                        >
+                          <svg x-show="!showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          <svg x-show="showPassword" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                  <input type="email" id="email" name="email" x-model="email" required
-                         class="mt-1 block w-full">
+                <div class="mt-6 flex justify-end space-x-3">
+                  <button type="button" @click="open = false"
+                          class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-150">
+                    Cancelar
+                  </button>
+                  <button type="submit"
+                          class="px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">
+                    Guardar Cambios
+                  </button>
                 </div>
-                <div>
-                  <label for="password" class="block text-sm font-medium text-gray-700">Nueva Contraseña (opcional)</label>
-                  <input type="password" id="password" name="password"
-                         class="mt-1 block w-full">
-                </div>
-              </div>
-              <div class="mt-6 flex justify-end space-x-3">
-                <button type="button" @click="editProfileModal = false"
-                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-150">
-                  Cancelar
-                </button>
-                <button type="submit"
-                        class="px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">
-                  Guardar Cambios
-                </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
       </div>
@@ -148,60 +227,14 @@
     <% if (user.rol === 'Admin') { %>
       <div id="usersTab" class="tab-content">
         <!-- Header con título y botón -->
-        <div class="flex justify-between items-center mb-6" x-data="{ newUserModal: false, nombre: '', email: '', password: '', rol: 'Usuario' }">
+        <div class="flex justify-between items-center mb-6">
           <h2 class="text-xl font-semibold text-gray-800">Gestión de Usuarios</h2>
           <button 
-            @click="newUserModal = true"
-            class="px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">
+            @click="open = true" 
+            class="px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150"
+          >
             Nuevo Usuario
           </button>
-
-          <!-- Modal Nuevo Usuario -->
-          <div x-show="newUserModal"
-               style="display: none"
-               class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4"
-                 @click.away="newUserModal = false">
-              <h3 class="text-lg font-medium text-gray-900 mb-4">Crear Nuevo Usuario</h3>
-              <form @submit.prevent="submitNewUser($event)">
-                <div class="space-y-4">
-                  <div>
-                    <label for="newNombre" class="block text-sm font-medium text-gray-700">Nombre</label>
-                    <input type="text" id="newNombre" name="nombre" x-model="nombre" required
-                           class="mt-1 block w-full">
-                  </div>
-                  <div>
-                    <label for="newEmail" class="block text-sm font-medium text-gray-700">Email</label>
-                    <input type="email" id="newEmail" name="email" x-model="email" required
-                           class="mt-1 block w-full">
-                  </div>
-                  <div>
-                    <label for="newPassword" class="block text-sm font-medium text-gray-700">Contraseña</label>
-                    <input type="password" id="newPassword" name="password" x-model="password" required
-                           class="mt-1 block w-full">
-                  </div>
-                  <div>
-                    <label for="newRol" class="block text-sm font-medium text-gray-700">Rol</label>
-                    <select id="newRol" name="rol" x-model="rol" required
-                            class="mt-1 block w-full">
-                      <option value="Usuario">Usuario</option>
-                      <option value="Admin">Administrador</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="mt-6 flex justify-end space-x-3">
-                  <button type="button" @click="newUserModal = false"
-                          class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-150">
-                    Cancelar
-                  </button>
-                  <button type="submit"
-                          class="px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">
-                    Crear Usuario
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
         </div>
         
         <!-- Tabla de usuarios -->
@@ -219,15 +252,15 @@
             <tbody class="bg-white divide-y divide-gray-200">
               <% if (allUsers && allUsers.length > 0) { %>
                 <% allUsers.forEach(function(usuario) { %>
-                  <tr>
+                  <tr data-user-id="<%= usuario.id %>">
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="text-sm font-medium text-gray-900"><%= usuario.nombre %></div>
+                      <div class="text-sm font-medium text-gray-900" data-nombre="<%= usuario.nombre %>"><%= usuario.nombre %></div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="text-sm text-gray-500"><%= usuario.email %></div>
+                      <div class="text-sm text-gray-500" data-email="<%= usuario.email %>"><%= usuario.email %></div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="text-sm text-gray-900"><%= usuario.rol %></div>
+                      <div class="text-sm text-gray-900" data-rol="<%= usuario.rol %>"><%= usuario.rol %></div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                       <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
@@ -313,6 +346,106 @@
   </div>
 </div>
 
+<!-- Modal Nuevo Usuario (solo admin) -->
+<% if (user.rol === 'Admin') { %>
+<div x-data="{ open: false, nombre: '', email: '', password: '', rol: 'Usuario' }">
+  <div x-show="open"
+       style="display: none"
+       class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+         @click.away="open = false">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Crear Nuevo Usuario</h3>
+      <form @submit.prevent="submitNewUser($event)">
+        <div class="space-y-4">
+          <div>
+            <label for="newNombre" class="block text-sm font-medium text-gray-700">Nombre</label>
+            <input type="text" id="newNombre" name="nombre" x-model="nombre" required
+                   class="mt-1 block w-full">
+          </div>
+          <div>
+            <label for="newEmail" class="block text-sm font-medium text-gray-700">Email</label>
+            <input type="email" id="newEmail" name="email" x-model="email" required
+                   class="mt-1 block w-full">
+          </div>
+          <div>
+            <label for="newPassword" class="block text-sm font-medium text-gray-700">Contraseña</label>
+            <input type="password" id="newPassword" name="password" x-model="password" required
+                   class="mt-1 block w-full">
+          </div>
+          <div>
+            <label for="newRol" class="block text-sm font-medium text-gray-700">Rol</label>
+            <select id="newRol" name="rol" x-model="rol" required
+                    class="mt-1 block w-full">
+              <option value="Usuario">Usuario</option>
+              <option value="Admin">Administrador</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+          <button type="button" @click="open = false"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-150">
+            Cancelar
+          </button>
+          <button type="submit"
+                  class="px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">
+            Crear Usuario
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<!-- Modal Editar Usuario -->
+<div x-data="{ open: false, nombre: '', email: '', password: '', rol: 'Usuario' }">
+  <div x-show="open"
+       style="display: none"
+       class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4"
+         @click.away="open = false">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Editar Usuario</h3>
+      <form @submit.prevent="submitEditUser($event)">
+        <div class="space-y-4">
+          <div>
+            <label for="editNombre" class="block text-sm font-medium text-gray-700">Nombre</label>
+            <input type="text" id="editNombre" name="nombre" x-model="nombre" required
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+          </div>
+          <div>
+            <label for="editEmail" class="block text-sm font-medium text-gray-700">Email</label>
+            <input type="email" id="editEmail" name="email" x-model="email" required
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+          </div>
+          <div>
+            <label for="editPassword" class="block text-sm font-medium text-gray-700">Nueva Contraseña (opcional)</label>
+            <input type="password" id="editPassword" name="password" x-model="password"
+                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+          </div>
+          <div>
+            <label for="editRol" class="block text-sm font-medium text-gray-700">Rol</label>
+            <select id="editRol" name="rol" x-model="rol" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+              <option value="Usuario">Usuario</option>
+              <option value="Admin">Administrador</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+          <button type="button" @click="open = false"
+                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors duration-150">
+            Cancelar
+          </button>
+          <button type="submit"
+                  class="px-4 py-2 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">
+            Guardar Cambios
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
 function switchTab(tabName) {
   // Ocultar todos los contenidos
@@ -346,16 +479,13 @@ function openNewUserModal() {
 
 // Función para editar perfil
 async function submitEditProfile(e) {
+  e.preventDefault();
   const formData = new FormData(e.target);
-  const data = Object.fromEntries(formData.entries());
   
   try {
     const response = await fetch('/api/users/profile', {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
+      body: formData // Enviamos FormData directamente para manejar la imagen
     });
 
     if (response.ok) {
@@ -439,6 +569,71 @@ async function deleteRecipe(recipeId) {
   } catch (error) {
     alert('Error al eliminar la receta');
     console.error('Error:', error);
+  }
+}
+
+// Función para editar usuario
+async function editUser(userId) {
+  const userRow = document.querySelector(`tr[data-user-id="${userId}"]`);
+  if (!userRow) return;
+
+  const modal = document.querySelector('[x-data*="open"]');
+  if (!modal) return;
+
+  const scope = Alpine.evaluate(modal, '$data');
+  scope.nombre = userRow.querySelector('[data-nombre]').textContent;
+  scope.email = userRow.querySelector('[data-email]').textContent;
+  scope.rol = userRow.querySelector('[data-rol]').textContent;
+  scope.userId = userId;
+  scope.open = true;
+}
+
+// Función para enviar edición de usuario
+async function submitEditUser(e) {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const userId = Alpine.evaluate(e.target.closest('[x-data]'), '$data').userId;
+  const data = Object.fromEntries(formData.entries());
+  
+  try {
+    const response = await fetch(`/api/users/${userId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (response.ok) {
+      window.location.reload();
+    } else {
+      const error = await response.json();
+      alert(error.message || 'Error al actualizar el usuario');
+    }
+  } catch (error) {
+    alert('Error al actualizar el usuario');
+    console.error('Error:', error);
+  }
+}
+
+// Función para previsualizar la imagen
+function previewImage(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      document.getElementById('preview-image').src = e.target.result;
+    }
+    reader.readAsDataURL(file);
+  }
+}
+
+// Función para eliminar la imagen
+function removeImage() {
+  document.getElementById('preview-image').src = '/assets/img/default-avatar.webp';
+  const fileInput = document.querySelector('input[type="file"]');
+  if (fileInput) {
+    fileInput.value = '';
   }
 }
 </script>
