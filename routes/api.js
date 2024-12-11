@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { Category } = require('../models');
+const userController = require('../controllers/userController');
 
 router.get('/recipes/categories/render', async (req, res) => {
     try {
@@ -23,5 +24,8 @@ router.get('/recipes/categories/render', async (req, res) => {
         res.status(500).json({ error: 'Error al obtener categorías' });
     }
 });
+
+// Ruta para actualizar usuario
+router.put('/users/:id', userController.updateUser);
 
 module.exports = router; 

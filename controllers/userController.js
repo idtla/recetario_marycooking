@@ -100,18 +100,42 @@ const userController = {
 
   updateUser: async (req, res) => {
     try {
-      const { nombre, email, rol, estado } = req.body;
-      const user = await User.findByPk(req.params.id);
-      
+      // Verificar si es admin
+      if (!req.session.user || req.session.user.rol !== 'Admin') {
+        return res.status(403).json({ message: 'No autorizado' });
+      }
+
+      const userId = req.params.id;
+      const { email, rol, password } = req.body;
+
+      const user = await User.findByPk(userId);
       if (!user) {
         return res.status(404).json({ message: 'Usuario no encontrado' });
       }
 
-      await user.update({ nombre, email, rol, estado });
-      res.json(user);
+      // Preparar datos de actualización
+      const updateData = {};
+      if (email) updateData.email = email;
+      if (rol) updateData.rol = rol;
+      if (password) {
+        updateData.password = await bcrypt.hash(password, 10);
+      }
+
+      // Actualizar usuario
+      await user.update(updateData);
+
+      res.json({ 
+        message: 'Usuario actualizado correctamente',
+        user: {
+          id: user.id,
+          email: user.email,
+          rol: user.rol,
+          estado: user.estado
+        }
+      });
     } catch (error) {
       console.error('Error al actualizar usuario:', error);
-      res.status(500).json({ message: 'Error interno del servidor' });
+      res.status(500).json({ message: 'Error al actualizar usuario' });
     }
   },
 
