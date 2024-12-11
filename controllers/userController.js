@@ -223,8 +223,8 @@ const userController = {
         email,
         rol,
         estado: 'Pendiente',
-        // Establecer una contraseña temporal que será cambiada en el registro
-        password: await bcrypt.hash(Math.random().toString(36), 10)
+        password: await bcrypt.hash(Math.random().toString(36), 10),
+        imagen_url: '/assets/img/default-avatar.webp'
       });
 
       console.log('Usuario pre-registrado exitosamente:', user.id);

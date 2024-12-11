@@ -36,7 +36,9 @@ const User = sequelize.define('usuarios', {
         defaultValue: '/assets/img/default-avatar.webp'
     }
 }, {
-    timestamps: false,
+    timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
     tableName: 'usuarios'
 });
 
