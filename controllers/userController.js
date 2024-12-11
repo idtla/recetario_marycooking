@@ -20,12 +20,17 @@ const userController = {
         return res.redirect('/auth/login');
       }
 
-      const recipes = await Recipe.findAll({
-        where: { UserId: user.id },
-        include: [{ model: Category, as: 'Category' }],
-        order: [['created_at', 'DESC']]
-      });
+      // Solo obtener recetas si es Editor o Admin
+      let recipes = [];
+      if (user.rol !== 'Usuario') {
+        recipes = await Recipe.findAll({
+          where: { UserId: user.id },
+          include: [{ model: Category, as: 'Category' }],
+          order: [['created_at', 'DESC']]
+        });
+      }
 
+      // Solo obtener usuarios si es Admin
       let allUsers = null;
       if (user.rol === 'Admin') {
         allUsers = await User.findAll({

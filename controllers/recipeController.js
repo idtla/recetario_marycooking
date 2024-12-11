@@ -77,6 +77,11 @@ exports.getRecipeBySlug = async (req, res) => {
 
 exports.createForm = async (req, res) => {
     try {
+        // Verificar si el usuario es Editor o Admin
+        if (!req.session.user || req.session.user.rol === 'Usuario') {
+            return res.redirect('/');
+        }
+
         const user = await getFullUser(req);
         const categories = await Category.findAll({
             include: [{
@@ -103,14 +108,34 @@ exports.createForm = async (req, res) => {
 
 exports.editForm = async (req, res) => {
     try {
+        // Verificar si el usuario está autenticado
+        if (!req.session.user) {
+            return res.redirect('/auth/login');
+        }
+
         const user = await getFullUser(req);
         const recipe = await Recipe.findOne({
             where: { slug: req.params.slug },
-            include: [{ model: Category, as: 'Category' }]
+            include: [
+                { model: Category, as: 'Category' }
+            ],
+            attributes: ['id', 'titulo', 'descripcion', 'ingredientes', 'instrucciones', 'imagen', 'dificultad', 
+                        'tiempoPreparacion', 'tiempoCoccion', 'porciones', 'slug', 'userId', 'categoryId']
         });
 
         if (!recipe) {
             return res.status(404).send('Receta no encontrada');
+        }
+
+        // Agregar logs para debug
+        console.log('User ID:', user.id);
+        console.log('Recipe userId:', recipe.userId);
+        console.log('User Rol:', user.rol);
+
+        // Verificar si el usuario tiene permiso para editar
+        if (user.rol === 'Usuario' || (user.rol === 'Editor' && parseInt(recipe.userId) !== parseInt(user.id))) {
+            console.log('Acceso denegado - redirigiendo');
+            return res.redirect('/');
         }
 
         const recipeData = recipe.toJSON();
@@ -203,13 +228,25 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
     try {
+        // Verificar si el usuario está autenticado
+        if (!req.session.user) {
+            return res.redirect('/auth/login');
+        }
+
+        const user = await getFullUser(req);
         const recipe = await Recipe.findOne({
             where: { slug: req.params.slug },
             include: [{ model: Category, as: 'Category' }]
         });
 
         if (!recipe) {
-            return res.status(404).render('404', { error: 'Receta no encontrada' });
+            return res.status(404).json({ error: 'Receta no encontrada' });
+        }
+
+        // Verificar si el usuario tiene permiso para editar
+        if (user.rol === 'Usuario' || (user.rol === 'Editor' && parseInt(recipe.userId) !== parseInt(user.id))) {
+            console.log('Acceso denegado en update - redirigiendo');
+            return res.redirect('/');
         }
 
         const { 
@@ -224,45 +261,38 @@ exports.update = async (req, res) => {
             porciones 
         } = req.body;
 
-        // Manejar imagen (código existente...)
-
         // Actualizar campos
-        recipe.titulo = titulo;
-        recipe.descripcion = descripcion;
-        recipe.ingredientes = ingredientes;
-        recipe.instrucciones = instrucciones;
-        recipe.categoryId = categoria ? parseInt(categoria) : null; // Modificación aquí
-        recipe.dificultad = dificultad;
-        recipe.tiempoPreparacion = parseInt(tiempoPreparacion);
-        recipe.tiempoCoccion = parseInt(tiempoCoccion);
-        recipe.tiempoTotal = parseInt(tiempoPreparacion) + parseInt(tiempoCoccion);
-        recipe.porciones = parseInt(porciones);
-        recipe.slug = slugify(titulo, { lower: true, strict: true });
-
-        await recipe.save();
-
-        // Obtener la categoría actualizada
-        const updatedRecipe = await Recipe.findOne({
-            where: { id: recipe.id },
-            include: [{ model: Category, as: 'Category' }]
+        await recipe.update({
+            titulo,
+            descripcion,
+            ingredientes,
+            instrucciones,
+            categoryId: categoria ? parseInt(categoria) : null,
+            dificultad,
+            tiempoPreparacion: parseInt(tiempoPreparacion),
+            tiempoCoccion: parseInt(tiempoCoccion),
+            porciones: parseInt(porciones),
+            slug: slugify(titulo, { lower: true, strict: true })
         });
 
-        // Redireccionar a la página de la receta con la ruta correcta
-        const categorySlug = updatedRecipe.Category ? updatedRecipe.Category.slug : 'uncategorized';
-        res.redirect(`/recipes/${categorySlug}/${updatedRecipe.slug}`);
+        // Redireccionar a la página de la receta
+        const redirectPath = recipe.Category 
+            ? `/recipes/${recipe.Category.slug}/${recipe.slug}`
+            : `/recipes/uncategorized/${recipe.slug}`;
 
+        res.redirect(redirectPath);
     } catch (error) {
-        console.error('Error al actualizar la receta:', error);
-        
+        console.error('Error en update:', error);
         const categories = await Category.findAll({
             include: [{ model: Category, as: 'children' }],
             where: { parentId: null }
         });
-
+        
         res.render('recipes/edit', { 
             error: 'Error al actualizar la receta',
             recipe: req.body,
-            categories
+            categories,
+            user: req.session.user
         });
     }
 };

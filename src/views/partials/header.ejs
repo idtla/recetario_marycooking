@@ -45,17 +45,21 @@
       <!-- Bloque derecho: Botones y Perfil -->
       <div class="flex items-center space-x-3 w-auto justify-end pr-4">
         <% if (locals.user) { %>
-          <!-- Botón Nueva Receta -->
-          <a href="/recipes/create" class="flex items-center px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-700" title="Nueva Receta">
-            <i class="fas fa-plus mr-2"></i>
-            <span>Crear</span>
-          </a>
+          <!-- Botón Nueva Receta (solo Editor y Admin) -->
+          <% if (user.rol !== 'Usuario') { %>
+            <a href="/recipes/create" class="flex items-center px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-700" title="Nueva Receta">
+              <i class="fas fa-plus mr-2"></i>
+              <span>Crear</span>
+            </a>
+          <% } %>
           
-          <!-- Botón Categorías -->
-          <a href="/categories/manage" class="flex items-center px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-700" title="Gestionar Categorías">
-            <i class="fas fa-tag mr-2"></i>
-            <span>Categorías</span>
-          </a>
+          <!-- Botón Categorías (solo Admin) -->
+          <% if (user.rol === 'Admin') { %>
+            <a href="/categories/manage" class="flex items-center px-4 py-2 text-sm font-medium text-white bg-pink-600 hover:bg-pink-700" title="Gestionar Categorías">
+              <i class="fas fa-tag mr-2"></i>
+              <span>Categorías</span>
+            </a>
+          <% } %>
 
           <!-- Avatar del usuario -->
           <div class="relative" x-data="{ open: false }">

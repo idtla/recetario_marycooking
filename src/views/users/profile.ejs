@@ -210,24 +210,78 @@
   <!-- Tabs -->
   <div class="border-b border-gray-200 mt-8">
     <nav class="-mb-px flex space-x-8">
+      <!-- Tab de perfil siempre visible -->
+      <button onclick="switchTab('profile', this)" 
+              class="tab-link py-4 px-1 border-b-2 font-medium text-gray-500 hover:text-pink-600 hover:border-pink-600">
+        Mi Perfil
+      </button>
+
+      <!-- Tab de recetas solo para Editor y Admin -->
+      <% if (user.rol !== 'Usuario') { %>
+        <button onclick="switchTab('recipes', this)" 
+                class="tab-link py-4 px-1 border-b-2 font-medium text-gray-500 hover:text-pink-600 hover:border-pink-600">
+          Mis Recetas
+        </button>
+      <% } %>
+
+      <!-- Tab de usuarios solo para Admin -->
       <% if (user.rol === 'Admin') { %>
         <button onclick="switchTab('users', this)" 
                 class="tab-link py-4 px-1 border-b-2 font-medium text-gray-500 hover:text-pink-600 hover:border-pink-600">
           Usuarios
         </button>
       <% } %>
-      <button onclick="switchTab('recipes', this)" 
-              class="tab-link py-4 px-1 border-b-2 font-medium text-gray-500 hover:text-pink-600 hover:border-pink-600">
-        Mis Recetas
-      </button>
     </nav>
   </div>
 
   <!-- Contenido de las tabs -->
   <div class="mt-6">
-    <!-- Tab de Usuarios (solo admin) -->
+    <!-- Tab de perfil siempre visible -->
+    <div id="profileTab" class="tab-content">
+      <!-- Contenido del perfil -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <!-- ... contenido existente del perfil ... -->
+      </div>
+    </div>
+
+    <!-- Tab de recetas solo para Editor y Admin -->
+    <% if (user.rol !== 'Usuario') { %>
+      <div id="recipesTab" class="tab-content hidden">
+        <div class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <% recipes.forEach(recipe => { %>
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+              <div class="relative">
+                <% if (recipe.imagen) { %>
+                  <img src="<%= recipe.imagen %>" 
+                       alt="<%= recipe.titulo %>"
+                       class="w-full h-48 object-cover"
+                       onerror="this.src='/img/default-recipe.jpg'">
+                <% } else { %>
+                  <img src="/img/default-recipe.jpg" 
+                       alt="Imagen por defecto"
+                       class="w-full h-48 object-cover">
+                <% } %>
+              </div>
+              <div class="p-4">
+                <h3 class="font-semibold mb-2"><%= recipe.titulo %></h3>
+                <div class="flex justify-end space-x-2">
+                  <a href="/recipes/<%= recipe.Category ? recipe.Category.slug : 'uncategorized' %>/<%= recipe.slug %>" 
+                     class="px-3 py-1.5 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">Ver</a>
+                  <a href="/recipes/<%= recipe.Category ? recipe.Category.slug : 'uncategorized' %>/<%= recipe.slug %>/edit" 
+                     class="px-3 py-1.5 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">Editar</a>
+                  <button onclick="deleteRecipe('<%= recipe.id %>')" 
+                          class="px-3 py-1.5 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">Eliminar</button>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Tab de usuarios solo para Admin -->
     <% if (user.rol === 'Admin') { %>
-      <div id="usersTab" class="tab-content">
+      <div id="usersTab" class="tab-content hidden">
         <!-- Gestión de Usuarios con Modal -->
         <div x-data="{ open: false, email: '', rol: 'Usuario' }">
           <!-- Header con título y botón -->
@@ -353,39 +407,6 @@
         </div>
       </div>
     <% } %>
-
-    <!-- Tab de Recetas -->
-    <div id="recipesTab" class="tab-content hidden">
-      <div class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        <% recipes.forEach(recipe => { %>
-          <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="relative">
-              <% if (recipe.imagen) { %>
-                <img src="<%= recipe.imagen %>" 
-                     alt="<%= recipe.titulo %>"
-                     class="w-full h-48 object-cover"
-                     onerror="this.src='/img/default-recipe.jpg'">
-              <% } else { %>
-                <img src="/img/default-recipe.jpg" 
-                     alt="Imagen por defecto"
-                     class="w-full h-48 object-cover">
-              <% } %>
-            </div>
-            <div class="p-4">
-              <h3 class="font-semibold mb-2"><%= recipe.titulo %></h3>
-              <div class="flex justify-end space-x-2">
-                <a href="/recipes/<%= recipe.Category ? recipe.Category.slug : 'uncategorized' %>/<%= recipe.slug %>" 
-                   class="px-3 py-1.5 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">Ver</a>
-                <a href="/recipes/<%= recipe.Category ? recipe.Category.slug : 'uncategorized' %>/<%= recipe.slug %>/edit" 
-                   class="px-3 py-1.5 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">Editar</a>
-                <button onclick="deleteRecipe('<%= recipe.id %>')" 
-                        class="px-3 py-1.5 bg-pink-600 text-white text-sm font-medium rounded-md hover:bg-pink-700 transition-colors duration-150">Eliminar</button>
-              </div>
-            </div>
-          </div>
-        <% }) %>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -410,10 +431,10 @@ function switchTab(tabName, element) {
 
 // Activar el tab inicial
 document.addEventListener('DOMContentLoaded', () => {
-  const activeTab = '<%= user.rol === "Admin" ? "users" : "recipes" %>';
-  const defaultTab = document.querySelector(`button[onclick="switchTab('${activeTab}', this)"]`);
+  // Siempre empezar en la tab de perfil
+  const defaultTab = document.querySelector('button[onclick="switchTab(\'profile\', this)"]');
   if (defaultTab) {
-    switchTab(activeTab, defaultTab);
+    switchTab('profile', defaultTab);
   }
 });
 

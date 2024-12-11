@@ -50,6 +50,11 @@ exports.getBySlug = async (req, res) => {
 
 exports.manageCategories = async (req, res) => {
     try {
+        // Verificar si el usuario es Admin
+        if (!req.session.user || req.session.user.rol !== 'Admin') {
+            return res.redirect('/');
+        }
+
         // Obtener el usuario completo si está en sesión
         let user = null;
         if (req.session.user) {
@@ -89,6 +94,11 @@ exports.manageCategories = async (req, res) => {
 
 exports.deleteCategory = async (req, res) => {
     try {
+        // Verificar si el usuario es Admin
+        if (!req.session.user || req.session.user.rol !== 'Admin') {
+            return res.status(403).json({ error: 'No tienes permiso para realizar esta acción' });
+        }
+
         const categoryId = req.params.id;
         
         const category = await Category.findByPk(categoryId);
@@ -116,6 +126,11 @@ exports.deleteCategory = async (req, res) => {
 
 exports.editCategory = async (req, res) => {
     try {
+        // Verificar si el usuario es Admin
+        if (!req.session.user || req.session.user.rol !== 'Admin') {
+            return res.status(403).json({ error: 'No tienes permiso para realizar esta acción' });
+        }
+
         const categoryId = req.params.id;
         const { name, parentId } = req.body;
 
@@ -145,6 +160,11 @@ exports.editCategory = async (req, res) => {
 
 exports.createCategory = async (req, res) => {
     try {
+        // Verificar si el usuario es Admin
+        if (!req.session.user || req.session.user.rol !== 'Admin') {
+            return res.status(403).json({ error: 'No tienes permiso para realizar esta acción' });
+        }
+
         const { name, parentId } = req.body;
 
         if (parentId) {
