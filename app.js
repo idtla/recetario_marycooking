@@ -4,6 +4,15 @@ const session = require('express-session');
 const path = require('path');
 const fileUpload = require('express-fileupload');
 
+// Logs iniciales
+console.log('Iniciando aplicación...');
+console.log('Variables de entorno cargadas:', {
+    DB_HOST: process.env.DB_HOST,
+    DB_USER: process.env.DB_USER,
+    DB_NAME: process.env.DB_NAME,
+    PORT: process.env.PORT
+});
+
 const app = express();
 
 // Configuración básica
@@ -67,15 +76,18 @@ app.use('/users', isAuthenticated, userRoutes);
 
 // Manejo de errores
 app.use((err, req, res, next) => {
-    console.error(err.stack);
+    console.error('Error detallado:', err);
+    console.error('Stack:', err.stack);
     res.status(500).send('¡Algo salió mal!');
 });
 
 // Iniciar servidor
-const { database } = require('./src/config/paths');
-const sequelize = require(database);
+const { sequelize } = require('./models');
+
+console.log('Intentando conectar a la base de datos...');
 sequelize.sync()
     .then(() => {
+        console.log('Conexión a la base de datos establecida');
         app.listen(process.env.PORT, () => {
             console.log(`Servidor corriendo en puerto ${process.env.PORT}`);
         });
