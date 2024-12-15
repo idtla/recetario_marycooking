@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 const path = require('path');
 const fileUpload = require('express-fileupload');
 
@@ -32,13 +33,39 @@ app.use(fileUpload({
     },
 }));
 
-// Sesiones
+// Configuración del store de sesiones MySQL
+const options = {
+    host: process.env.DB_HOST,
+    port: 3306,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    clearExpired: true,
+    checkExpirationInterval: 900000,
+    expiration: 86400000,
+    createDatabaseTable: true,
+    schema: {
+        tableName: 'sessions',
+        columnNames: {
+            session_id: 'session_id',
+            expires: 'expires',
+            data: 'data'
+        }
+    }
+};
+
+const sessionStore = new MySQLStore(options);
+
+// Configuración de sesiones con MySQL
 app.use(session({
+    key: 'session_cookie_name',
     secret: process.env.SESSION_SECRET,
+    store: sessionStore,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: {
-        maxAge: 1000 * 60 * 60 * 24 // 24 horas
+        secure: false, // cambiar a true si usas https
+        maxAge: 24 * 60 * 60 * 1000 // 24 horas
     }
 }));
 
